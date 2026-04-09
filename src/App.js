@@ -1,166 +1,76 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { LoginPage } from "./components/auth/LoginPage";
-import { LoadingScreen } from "./components/auth/LoadingScreen";
-import { Layout } from "./components/layout";
-import { OrdersView } from "./components/orders/OrdersView";
-import { OrderDetails } from "./components/orders/OrderDetails";
-import { OngoingOrders } from "./components/orders/OngoingOrders";
-import { SubscriptionsView } from "./components/subscriptions/SubscriptionsView";
-import { SubscriptionDetails } from "./components/subscriptions/SubscriptionDetails";
-import { SubscriptionDeliveries } from "./components/subscriptions/SubscriptionDeliveries";
 import { UserManagement } from "./components/users/UserManagement";
-import { ProductManagement } from "./components/products/ProductManagement";
-import { InventoryManagement } from "./components/inventory/InventoryManagement";
+import { InventoryManagement } from "./Pages/InventoryManagement";
 import { CouponManagement } from "./components/cupons/CouponManagement";
+import { Layout } from "./components/layout";
+import { Outlet, useNavigate } from "react-router-dom";
+import { ProductManagement } from "./Pages/ProductManagement";
+import { Toaster } from 'react-hot-toast';
+import { OrdersView } from "./Pages/OrderManagement";
+import { SubscriptionManagement } from "./Pages/SubscriptionManagement";
+import OngoingDeliveryManagement from "./Pages/OngoingDeliveryManagement";
 
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+// Protected Route
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" replace />;
+};
 
-  const [activeTab, setActiveTab] = useState("ongoing");
-  const [ongoingSubTab, setOngoingSubTab] = useState("orders");
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [selectedSubscriptionId, setSelectedSubscriptionId] = useState(null);
+const LayoutWrapper = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // 🔐 Login Handler
-  const handleLogin = () => {
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsAuthenticated(true);
-    }, 2000); // 2 seconds loading animation
-  };
-
-  // Show loading screen
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
-  // Show login page first
-  if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />;
-  }
-
-  // ===============================
-  // Dashboard Logic Below
-  // ===============================
-
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    setSelectedOrderId(null);
-    setSelectedSubscriptionId(null);
-  };
-
-  const handleOrderClick = (orderId) => {
-    setSelectedOrderId(orderId);
-  };
-
-  const handleBackFromOrderDetails = () => {
-    setSelectedOrderId(null);
-  };
-
-  const handleSubscriptionClick = (subscriptionId) => {
-    setSelectedSubscriptionId(subscriptionId);
-  };
-
-  const handleBackFromSubscriptionDetails = () => {
-    setSelectedSubscriptionId(null);
-  };
-
-  const renderContent = () => {
-    if (
-      selectedOrderId !== null &&
-      (activeTab === "orders" || activeTab === "ongoing")
-    ) {
-      return (
-        <OrderDetails
-          orderId={selectedOrderId}
-          onBack={handleBackFromOrderDetails}
-        />
-      );
-    }
-
-    if (
-      selectedSubscriptionId !== null &&
-      (activeTab === "subscriptions" || activeTab === "ongoing")
-    ) {
-      return (
-        <SubscriptionDetails
-          subscriptionId={selectedSubscriptionId}
-          onBack={handleBackFromSubscriptionDetails}
-        />
-      );
-    }
-
-    switch (activeTab) {
-      case "ongoing":
-        return (
-          <div>
-            <div className="border-b border-gray-200 bg-white px-8 pt-6">
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setOngoingSubTab("orders")}
-                  className={`px-4 py-2 border-b-2 transition-colors ${ongoingSubTab === "orders"
-                      ? "border-green-600 text-green-600"
-                      : "border-transparent text-gray-600"
-                    }`}
-                >
-                  Ongoing Orders
-                </button>
-
-                <button
-                  onClick={() => setOngoingSubTab("deliveries")}
-                  className={`px-4 py-2 border-b-2 transition-colors ${ongoingSubTab === "deliveries"
-                      ? "border-green-600 text-green-600"
-                      : "border-transparent text-gray-600"
-                    }`}
-                >
-                  Subscription Deliveries
-                </button>
-              </div>
-            </div>
-
-            {ongoingSubTab === "orders" ? (
-              <OngoingOrders onOrderClick={handleOrderClick} />
-            ) : (
-              <SubscriptionDeliveries
-                onSubscriptionClick={handleSubscriptionClick}
-              />
-            )}
-          </div>
-        );
-
-      case "orders":
-        return <OrdersView onOrderClick={handleOrderClick} />;
-
-      case "subscriptions":
-        return (
-          <SubscriptionsView
-            onSubscriptionClick={handleSubscriptionClick}
-          />
-        );
-
-      case "users":
-        return <UserManagement />;
-
-      case "products":
-        return <ProductManagement />;
-
-      case "inventory":
-        return <InventoryManagement />;
-
-      case "coupons":
-        return <CouponManagement />;
-
-      default:
-        return <div className="p-8">Select a tab</div>;
-    }
-  };
+  // Strips the leading "/" → "ongoing", "orders", etc.
+  const activeTab = location.pathname.split("/")[1];
 
   return (
-    <Layout activeTab={activeTab} onTabChange={handleTabChange}>
-      {renderContent()}
+    <Layout activeTab={activeTab} onTabChange={(tab) => navigate(`/${tab}`)}>
+      <Outlet />
     </Layout>
+  );
+};
+
+// Login Wrapper
+const LoginWrapper = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
+  if (token) return <Navigate to="/ongoing" replace />;
+
+  return <LoginPage onLogin={() => navigate("/ongoing")} />;
+};
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+
+        {/* Login */}
+        <Route path="/login" element={<LoginWrapper />} />
+
+        {/* Protected */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <LayoutWrapper />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="ongoing" replace />} />
+          <Route path="ongoing" element={<OngoingDeliveryManagement />} />
+          <Route path="orders" element={<OrdersView />} />
+          <Route path="subscriptions" element={<SubscriptionManagement />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="products" element={<ProductManagement />} />
+          <Route path="inventory" element={<InventoryManagement />} />
+          <Route path="coupons" element={<CouponManagement />} />
+        </Route>
+
+      </Routes>
+
+      <Toaster position="top-center" />
+    </BrowserRouter>
   );
 }

@@ -10,14 +10,17 @@ import {
     Menu,
     X
 } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 export function Layout({ children, activeTab, onTabChange }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const navigate = useNavigate();
 
     const menuItems = [
         { id: 'ongoing', label: 'Ongoing Deliveries', icon: Truck },
-        { id: 'orders', label: 'View Orders', icon: LayoutDashboard },
-        { id: 'subscriptions', label: 'View Subscriptions', icon: Package },
+        { id: 'orders', label: 'Order Management', icon: LayoutDashboard },
+        { id: 'subscriptions', label: 'Subscription Managemnt', icon: Package },
         { id: 'users', label: 'User Management', icon: Users },
         { id: 'products', label: 'Product Management', icon: Box },
         { id: 'inventory', label: 'Inventory Management', icon: Settings },
@@ -29,42 +32,47 @@ export function Layout({ children, activeTab, onTabChange }) {
         setSidebarOpen(false);
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+
+        navigate("/login");
+    };
+
     return (
         <div className="flex h-screen bg-gray-50 overflow-hidden">
 
-            {/* Mobile Overlay */}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
-
             {/* Sidebar */}
             <aside
-                className={`fixed lg:static z-50 h-full w-64 
-                bg-[#2E7D32] text-white flex flex-col 
-                transform transition-transform duration-300
-                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                lg:translate-x-0`}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className={`
+                    fixed lg:static z-50 h-full
+                    bg-[#2E7D32] text-white flex flex-col
+                    transition-all duration-300
+                    ${isHovered ? 'w-64' : 'w-20'}
+                    ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    lg:translate-x-0
+                `}
             >
                 {/* Header */}
-                <div className="p-6 border-b border-green-700 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-xl font-bold">KedharFarms</h1>
-                        <p className="text-xs text-green-200">Admin Dashboard</p>
-                    </div>
+                <div className="p-4 border-b border-green-700 flex items-center justify-between">
+                    {isHovered && (
+                        <div>
+                            <h1 className="text-lg font-bold">KedharFarms</h1>
+                            <p className="text-xs text-green-200">Admin</p>
+                        </div>
+                    )}
 
                     <button
                         onClick={() => setSidebarOpen(false)}
-                        className="lg:hidden hover:bg-green-700 p-2 rounded-lg transition"
+                        className="lg:hidden hover:bg-green-700 p-2 rounded-lg"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 py-6 overflow-y-auto">
+                <nav className="flex-1 py-4">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = activeTab === item.id;
@@ -73,36 +81,53 @@ export function Layout({ children, activeTab, onTabChange }) {
                             <button
                                 key={item.id}
                                 onClick={() => handleTabClick(item.id)}
-                                className={`w-full flex items-center gap-3 px-6 py-3 transition-colors
-                                ${isActive
-                                        ? 'bg-[#E8F5E9] text-[#2E7D32] border-r-4 border-[#2E7D32]'
-                                        : 'hover:bg-green-700'
-                                    }`}
+                                className={`
+                                    w-full flex items-center gap-3 px-4 py-3
+                                    transition-all
+                                    ${isActive ? 'bg-white text-[#2E7D32]' : ''}
+                                    hover:bg-white hover:text-[#2E7D32]
+                                `}
                             >
-                                <Icon className="w-5 h-5" />
-                                <span className="text-sm font-medium">
+                                <Icon className="w-5 h-5 min-w-[20px]" />
+
+                                {/* Label appears only on hover */}
+                                <span
+                                    className={`
+                                        text-sm font-medium whitespace-nowrap
+                                        transition-opacity duration-200
+                                        ${isHovered ? 'opacity-100' : 'opacity-0'}
+                                    `}
+                                >
                                     {item.label}
                                 </span>
                             </button>
                         );
                     })}
                 </nav>
+                <div className="p-4 border-t border-green-700">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white hover:text-[#2E7D32] transition"
+                    >
+                        {/* You can use any icon */}
+                        <span className="text-sm font-medium">
+                            {isHovered ? "Logout" : "⏻"}
+                        </span>
+                    </button>
+                </div>
             </aside>
 
             {/* Main Section */}
             <div className="flex flex-col flex-1 w-full">
 
-                {/* Top Bar (Mobile Only) */}
-                <header className="lg:hidden bg-white border-b border-gray-200 p-4 flex items-center">
+                {/* Mobile Topbar */}
+                <header className="lg:hidden bg-white border-b p-4 flex items-center">
                     <button onClick={() => setSidebarOpen(true)}>
                         <Menu className="w-6 h-6" />
                     </button>
-                    <h2 className="ml-4 font-semibold text-gray-800">
-                        Admin Dashboard
-                    </h2>
+                    <h2 className="ml-4 font-semibold">Admin Dashboard</h2>
                 </header>
 
-                {/* Main Content */}
                 <main className="flex-1 overflow-auto">
                     {children}
                 </main>
