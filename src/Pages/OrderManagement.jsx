@@ -8,6 +8,7 @@ import { CloseOutlined } from '@ant-design/icons';
 import Pagination from "../components/common/Pagination";
 import DateFilter from "../components/common/DateFilter";
 import { formatISTTime } from "../utils/utils";
+import { getOrderStatusBadge } from "../constants/commonConstants";
 
 export function OrdersView() {
     const BASE_URL = process.env.REACT_APP_API_URL;
@@ -75,19 +76,6 @@ export function OrdersView() {
 
         return () => clearTimeout(timer);
     }, [currentPage, searchQuery, statusFilter, startDate, endDate]);
-
-    const getStatusBadge = (status) => {
-        const colors = {
-            DELIVERED: "bg-green-100 text-green-800",
-            CANCELLED: "bg-gray-100 text-gray-800",
-            REJECTED: "bg-red-100 text-red-800",
-            PROCESSING: "bg-blue-100 text-blue-800",
-            OUT_FOR_DELIVERY: "bg-yellow-100 text-yellow-800",
-        };
-
-        return colors[status] || "bg-gray-100 text-gray-800";
-    };
-
 
     const clearAllFilters = () => {
         setSearchQuery('');
@@ -158,7 +146,7 @@ export function OrdersView() {
                         />
                     </div>
 
-                    {(statusFilter ||
+                    {(statusFilter!="ALL" ||
                         startDate ||
                         endDate ||
                         searchQuery
@@ -190,25 +178,27 @@ export function OrdersView() {
                     </thead>
 
                     <tbody>
-                        {orders.map((o, index) => (
+                        {orders.map((order, index) => (
                             <tr
-                                key={o.id}
-                                onClick={() => navigate(`/orders/${o.id}`)}
+                                key={order.id}
+                                onClick={() =>
+                                    window.open(`/orders/${order.id}`, "_blank")
+                                }
                                 className="hover:bg-gray-50 cursor-pointer"
                             >
                                 <td className="px-4 py-2">
                                     {(currentPage - 1) * pageSize + index + 1}
                                 </td>
-                                <td className="px-4 py-2">{o.order_no}</td>
-                                <td className="px-4 py-2">{o.user_name}</td>
-                                <td className="px-4 py-2">{o.delivery_address}</td>
-                                <td className="px-4 py-2">₹{o.total_amount}</td>
+                                <td className="px-4 py-2">{order.order_no}</td>
+                                <td className="px-4 py-2">{order.user_name}</td>
+                                <td className="px-4 py-2">{order.delivery_address}</td>
+                                <td className="px-4 py-2">₹{order.total_amount}</td>
                                 <td className="px-4 py-2">
-                                    {formatISTTime(o.created_at)}
+                                    {formatISTTime(order.created_at)}
                                 </td>
                                 <td className="px-4 py-2">
-                                    <span className={`px-2 py-1 text-xs rounded ${getStatusBadge(o.current_status)}`}>
-                                        {o.current_status}
+                                    <span className={`px-2 py-1 text-xs rounded ${getOrderStatusBadge(order.current_status)}`}>
+                                        {order.current_status}
                                     </span>
                                 </td>
                             </tr>

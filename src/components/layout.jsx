@@ -11,10 +11,12 @@ import {
     X
 } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import ConfirmationModal from './common/ConfirmationModal';
 
 export function Layout({ children, activeTab, onTabChange }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
     const navigate = useNavigate();
 
     const menuItems = [
@@ -47,7 +49,7 @@ export function Layout({ children, activeTab, onTabChange }) {
                 onMouseLeave={() => setIsHovered(false)}
                 className={`
                     fixed lg:static z-50 h-full
-                    bg-[#2E7D32] text-white flex flex-col
+                    bg-[#7CA126] text-white flex flex-col
                     transition-all duration-300
                     ${isHovered ? 'w-64' : 'w-20'}
                     ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -55,17 +57,17 @@ export function Layout({ children, activeTab, onTabChange }) {
                 `}
             >
                 {/* Header */}
-                <div className="p-4 border-b border-green-700 flex items-center justify-between">
+                <div className="p-4 border-b border-[#94BF30] flex items-center justify-between">
                     {isHovered && (
                         <div>
-                            <h1 className="text-lg font-bold">KedharFarms</h1>
-                            <p className="text-xs text-green-200">Admin</p>
+                            <h1 className="text-lg font-bold text-white">KedharFarms</h1>
+                            <p className="text-xs text-white">Admin</p>
                         </div>
                     )}
 
                     <button
                         onClick={() => setSidebarOpen(false)}
-                        className="lg:hidden hover:bg-green-700 p-2 rounded-lg"
+                        className="lg:hidden hover:bg-[#94BF30] p-2 rounded-lg"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -84,8 +86,8 @@ export function Layout({ children, activeTab, onTabChange }) {
                                 className={`
                                     w-full flex items-center gap-3 px-4 py-3
                                     transition-all
-                                    ${isActive ? 'bg-white text-[#2E7D32]' : ''}
-                                    hover:bg-white hover:text-[#2E7D32]
+                                    ${isActive ? 'bg-white text-[#94BF30]' : ''}
+                                    hover:bg-white hover:text-[#94BF30]
                                 `}
                             >
                                 <Icon className="w-5 h-5 min-w-[20px]" />
@@ -104,10 +106,10 @@ export function Layout({ children, activeTab, onTabChange }) {
                         );
                     })}
                 </nav>
-                <div className="p-4 border-t border-green-700">
+                <div className="p-4 border-t border-[#94BF30]">
                     <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white hover:text-[#2E7D32] transition"
+                        onClick={() => setShowLogoutModal(true)}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white hover:text-[#7CA126] transition"
                     >
                         {/* You can use any icon */}
                         <span className="text-sm font-medium">
@@ -132,6 +134,21 @@ export function Layout({ children, activeTab, onTabChange }) {
                     {children}
                 </main>
             </div>
+            <ConfirmationModal
+                isOpen={showLogoutModal}
+                onClose={() => {
+                    setShowLogoutModal(false);
+                }}
+                title="Confirm Logout"
+                zIndex="z-[60]"
+                onConfirm={handleLogout}
+                confirmText={`Confirm`}
+            >
+                <p className="text-sm text-gray-600 mb-4">
+                Are you sure to logout?
+                </p>
+
+            </ConfirmationModal>
         </div>
     );
 }

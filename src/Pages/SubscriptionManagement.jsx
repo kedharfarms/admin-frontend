@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 import Pagination from "../components/common/Pagination";
+import { getSubscriptionStatusBadge } from "../constants/commonConstants";
 
 export function SubscriptionManagement() {
     const BASE_URL = process.env.REACT_APP_API_URL;
@@ -64,16 +65,6 @@ export function SubscriptionManagement() {
 
         return () => clearTimeout(timer);
     }, [searchQuery, currentPage]);
-
-    const getStatusBadge = (status) => {
-        const colors = {
-            ACTIVE: "bg-green-100 text-green-800",
-            PAYMENT_PENDING: "bg-yellow-100 text-yellow-800",
-            CANCELLED: "bg-red-100 text-red-800",
-            EXPIRED: "bg-gray-100 text-gray-800",
-        };
-        return colors[status] || "bg-gray-100 text-gray-800";
-    };
 
     return (
         <div className="p-6">
@@ -155,11 +146,11 @@ export function SubscriptionManagement() {
                                 </td>
                             </tr>
                         ) : (
-                            subscriptions.map((sub, index) => (
+                            subscriptions.map((subscription, index) => (
                                 <tr
-                                    key={sub.id}
+                                    key={subscription.id}
                                     onClick={() =>
-                                        navigate(`/subscriptions/${sub.id}`)
+                                        window.open(`/subscriptions/${subscription.id}`, "_blank")
                                     }
                                     className="hover:bg-gray-50 cursor-pointer"
                                 >
@@ -167,40 +158,40 @@ export function SubscriptionManagement() {
                                         {(currentPage - 1) * pageSize + index + 1}
                                     </td>
                                     <td className="px-4 py-2">
-                                        {sub.subscription_no}
+                                        {subscription.subscription_no}
                                     </td>
 
                                     <td className="px-4 py-2">
-                                        {sub.user_name}
+                                        {subscription.user_name}
                                     </td>
 
                                     <td className="px-4 py-2">
-                                        {sub.plan_name}
+                                        {subscription.plan_name}
                                     </td>
 
                                     <td className="px-4 py-2">
                                         <span
-                                            className={`px-2 py-1 text-xs rounded ${getStatusBadge(
-                                                sub.status
+                                            className={`px-2 py-1 text-xs rounded ${getSubscriptionStatusBadge(
+                                                subscription.status
                                             )}`}
                                         >
-                                            {sub.status}
+                                            {subscription.status}
                                         </span>
                                     </td>
 
                                     <td className="px-4 py-2">
-                                        ₹{sub.price_per_delivery}
+                                        ₹{subscription.price_per_delivery}
                                     </td>
 
                                     <td className="px-4 py-2 text-sm text-gray-600">
                                         {new Date(
-                                            sub.start_date
+                                            subscription.start_date
                                         ).toLocaleDateString()}
                                     </td>
 
                                     <td className="px-4 py-2 text-sm text-gray-600">
                                         {new Date(
-                                            sub.created_at
+                                            subscription.created_at
                                         ).toLocaleDateString()}
                                     </td>
                                 </tr>

@@ -12,3 +12,18 @@ export const formatISTTime = (timeStr) => {
     minute: '2-digit',
   });
 };
+
+export const populateAddress = (address) => {
+  if (!address) return '-';
+
+  const parts = [
+    address.name,
+    address.house,
+    address.street,
+    address.city,
+    address.pincode
+  ];
+
+  // Remove empty/undefined values and join with comma
+  return parts.filter(Boolean).join(', ');
+};

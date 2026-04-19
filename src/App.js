@@ -10,6 +10,8 @@ import { Toaster } from 'react-hot-toast';
 import { OrdersView } from "./Pages/OrderManagement";
 import { SubscriptionManagement } from "./Pages/SubscriptionManagement";
 import OngoingDeliveryManagement from "./Pages/OngoingDeliveryManagement";
+import { OrderDetails } from "./Pages/OrderDetails";
+import { SubscriptionDetails } from "./Pages/SubscriptionDetails";
 
 // Protected Route
 const ProtectedRoute = ({ children }) => {
@@ -61,7 +63,9 @@ export default function App() {
           <Route index element={<Navigate to="ongoing" replace />} />
           <Route path="ongoing" element={<OngoingDeliveryManagement />} />
           <Route path="orders" element={<OrdersView />} />
+          <Route path="orders/:id" element={<OrderDetails />} />
           <Route path="subscriptions" element={<SubscriptionManagement />} />
+          <Route path="subscriptions/:id" element={<SubscriptionDetails />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="products" element={<ProductManagement />} />
           <Route path="inventory" element={<InventoryManagement />} />

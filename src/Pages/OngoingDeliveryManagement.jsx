@@ -86,8 +86,6 @@ export default function OngoingDeliveryManagement() {
 
             const result = res?.data?.data;
 
-            console.log(result)
-
             setData(result?.data || []);
             setTotalPages(result?.total_pages || 1);
             setTotalRecords(result?.total_rows || 0);
@@ -142,7 +140,7 @@ export default function OngoingDeliveryManagement() {
                         }}
                         className={`pb-2 ${
                             activeTab === tab.key
-                                ? "border-b-2 border-green-600 text-green-600"
+                                ? "border-b-2 border-[#94BF30] text-[#94BF30]"
                                 : "text-gray-500"
                         }`}
                     >
@@ -154,22 +152,21 @@ export default function OngoingDeliveryManagement() {
             {/* Filters (SAME UI) */}
             <div className="bg-white p-4 rounded-lg border mb-6">
                 <div className="flex flex-row gap-4">
-
-                    {/* Status */}
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => {
-                            setCurrentPage(1);
-                            setStatusFilter(e.target.value);
-                        }}
-                        className="px-3 py-2 border rounded-lg w-[200px]"
-                    >
-                        <option value="ALL">All</option>
-                        <option value="PROCESSING">Processing</option>
-                        <option value="OUT_FOR_DELIVERY">Out For Delivery</option>
-                        <option value="ACTIVE">Active</option>
-                        <option value="PAYMENT_PENDING">Payment Pending</option>
-                    </select>
+                    {
+                        activeTab == 'orders' && 
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => {
+                                setCurrentPage(1);
+                                setStatusFilter(e.target.value);
+                            }}
+                            className="px-3 py-2 border rounded-lg w-[200px]"
+                        >
+                            <option value="ALL">All</option>
+                            <option value="PROCESSING">Processing</option>
+                            <option value="OUT_FOR_DELIVERY">Out For Delivery</option>
+                        </select>
+                    }
 
                     {/* Search */}
                     <div className="relative">
@@ -185,17 +182,18 @@ export default function OngoingDeliveryManagement() {
                             className="pl-10 pr-3 py-2 border rounded-lg"
                         />
                     </div>
-
-                    {/* Date */}
-                    <DateFilter
-                        ref={dateFilterRef}
-                        value={[startDate, endDate]}
-                        onChange={(dates) => {
-                            setStartDate(dates?.[0] || "");
-                            setEndDate(dates?.[1] || "");
-                            setCurrentPage(1);
-                        }}
-                    />
+                    {
+                        activeTab == 'orders' && 
+                        <DateFilter
+                            ref={dateFilterRef}
+                            value={[startDate, endDate]}
+                            onChange={(dates) => {
+                                setStartDate(dates?.[0] || "");
+                                setEndDate(dates?.[1] || "");
+                                setCurrentPage(1);
+                            }}
+                        />
+                    }
 
                     {(searchQuery || statusFilter !== "ALL" || startDate || endDate) && (
                         <button
@@ -219,6 +217,7 @@ export default function OngoingDeliveryManagement() {
                     totalRecords={totalRecords}
                     onPageChange={handlePageChange}
                     pageSize={pageSize}
+                    refreshOrders={fetchData}
                 />
             )}
 
@@ -231,6 +230,7 @@ export default function OngoingDeliveryManagement() {
                     totalRecords={totalRecords}
                     onPageChange={handlePageChange}
                     pageSize={pageSize}
+                    refreshSubscriptions={fetchData}
                 />
             )}
         </div>

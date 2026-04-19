@@ -7,11 +7,13 @@ import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import Products from '../components/productManagement/Products';
 import ProductVariants from '../components/productManagement/ProductVariants';
+import SubscriptionPlans from '../components/productManagement/SubscriptionPlans';
 
 const TABS = [
     { key: 'categories', label: 'Categories' },
     { key: 'products',   label: 'Products' },
     { key: 'variants',   label: 'Product Variants' },
+    { key: 'subscription_plans',   label: 'Subcription Plans' },
 ];
 
 export function ProductManagement() {
@@ -196,6 +198,18 @@ export function ProductManagement() {
             {activeTab === 'variants'   && 
             <ProductVariants
                 variants={data} 
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalPages={totalPages}
+                totalRecords={totalRecords}
+                isLoading={isLoading}
+                handlePageChange={handlePageChange}
+                onRefresh={fetchData} 
+            />}
+            
+            {activeTab === 'subscription_plans'   && 
+            <SubscriptionPlans
+                plans={data} 
                 currentPage={currentPage}
                 pageSize={pageSize}
                 totalPages={totalPages}
