@@ -57,7 +57,7 @@ export default function SubscriptionPlans({
             setIsSubmitting(true);
 
             await axios.post(
-                BASE_URL + '/product-management/subscription-plans',
+                BASE_URL + '/product-management/subscription-plan',
                 {
                     ...form,
                     price_per_delivery: Number(form.price_per_delivery),
@@ -85,7 +85,7 @@ export default function SubscriptionPlans({
             setIsSubmitting(true);
 
             await axios.put(
-                `${BASE_URL}/product-management/subscription-plans/${selectedId}`,
+                `${BASE_URL}/product-management/subscription-plan/${selectedId}`,
                 {
                     ...editForm,
                     price_per_delivery: Number(editForm.price_per_delivery),
@@ -111,7 +111,7 @@ export default function SubscriptionPlans({
             setIsSubmitting(true);
 
             await axios.delete(
-                `${BASE_URL}/product-management/subscription-plans/${selectedId}`,
+                `${BASE_URL}/product-management/subscription-plan/${selectedId}`,
                 { headers: { Authorization: token } }
             );
 
@@ -317,6 +317,154 @@ export default function SubscriptionPlans({
 
                     </form>
                 </Modal>
+            )}
+
+            {/* DELETE MODAL */}
+            {showDeleteModal && (
+                <Modal title="Delete Plan" onClose={() => setShowDeleteModal(false)}>
+                    <div className="space-y-4">
+                        <p className="text-gray-600">
+                            This action cannot be undone. Are you sure you want to delete this plan?
+                        </p>
+                        <div className="flex flex-row gap-2 pt-2">
+                            <button
+                                onClick={handleDelete}
+                                disabled={isSubmitting}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Deleting...' : 'Delete'}
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setShowDeleteModal(false);
+                                    setSelectedId(null);
+                                }}
+                                className="flex-1 px-4 py-2 border rounded-lg"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
+            {/* EDIT MODAL */}
+            {showEditModal && (
+                <Modal
+                    title="Edit Subscription Plan"
+                    disabled={isSubmitting}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setSelectedId(null);
+                        setEditForm(DEFAULT_FORM);
+                    }}
+                >
+                    <form onSubmit={handleUpdate} className="space-y-4">
+
+                        <Input
+                            label="Title *"
+                            value={editForm.title}
+                            onChange={(e) => setEdit('title', e.target.value)}
+                            required
+                        />
+
+                        <Input
+                            label="Sub Title *"
+                            value={editForm.sub_title}
+                            onChange={(e) => setEdit('sub_title', e.target.value)}
+                            required
+                        />
+
+                        <Input
+                            label="Price Per Delivery *"
+                            type="number"
+                            value={editForm.price_per_delivery}
+                            onChange={(e) => setEdit('price_per_delivery', e.target.value)}
+                            required
+                        />
+
+                        <Input
+                            label="Validity (Days) *"
+                            type="number"
+                            value={editForm.validity_days}
+                            onChange={(e) => setEdit('validity_days', e.target.value)}
+                            required
+                        />
+
+                        <SelectInput
+                            label="Frequency *"
+                            value={editForm.frequency}
+                            onChange={(e) => setEdit('frequency', e.target.value)}
+                            options={[
+                                { label: 'Daily', value: 'daily' },
+                                { label: 'Alternate', value: 'alternate' },
+                                { label: 'Weekly', value: 'weekly' },
+                            ]}
+                            placeholder="Select Frequency"
+                            required
+                        />
+
+                        <SelectInput
+                            label="Category *"
+                            value={editForm.category_id}
+                            onChange={(e) => setEdit('category_id', e.target.value)}
+                            options={categoryOptions}
+                            placeholder="Select Category"
+                            required
+                        />
+
+                        <Input
+                            label="Image URLs (comma separated)"
+                            value={(editForm.image_urls || []).join(', ')}
+                            placeholder="https://..., https://..."
+                            onChange={(e) => handleImageChange(e.target.value, true)}
+                        />
+
+                        <div className="flex gap-2 pt-2">
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Updating...' : 'Update Plan'}
+                            </button>
+
+                            <button
+                                type="button"
+                                disabled={isSubmitting}
+                                onClick={() => {
+                                    setShowEditModal(false);
+                                    setSelectedId(null);
+                                    setEditForm(DEFAULT_FORM);
+                                }}
+                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+
+                    </form>
+                </Modal>
+            )}
+            {totalPages > 0 && (
+                <div className="px-4 py-1 border-t border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">
+                        Showing <span className="font-medium">{pageSize}</span> rows per page
+                        <span className="mx-2">•</span>
+                        <span className="font-medium">{totalRecords}</span> total results
+                    </div>
+
+                    {totalPages > 1 && (
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    )}
+                    </div>
+                </div>
             )}
         </>
     );

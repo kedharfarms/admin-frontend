@@ -23,7 +23,7 @@ export function Layout({ children, activeTab, onTabChange }) {
         { id: 'ongoing', label: 'Ongoing Deliveries', icon: Truck },
         { id: 'orders', label: 'Order Management', icon: LayoutDashboard },
         { id: 'subscriptions', label: 'Subscription Managemnt', icon: Package },
-        { id: 'users', label: 'User Management', icon: Users },
+        // { id: 'users', label: 'User Management', icon: Users },
         { id: 'products', label: 'Product Management', icon: Box },
         { id: 'inventory', label: 'Inventory Management', icon: Settings },
         { id: 'coupons', label: 'Coupon Management', icon: Gift },

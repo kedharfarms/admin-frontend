@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { LoginPage } from "./components/auth/LoginPage";
 import { UserManagement } from "./components/users/UserManagement";
 import { InventoryManagement } from "./Pages/InventoryManagement";
-import { CouponManagement } from "./components/cupons/CouponManagement";
+import { CouponManagement } from "./Pages/CouponManagement";
 import { Layout } from "./components/layout";
 import { Outlet, useNavigate } from "react-router-dom";
 import { ProductManagement } from "./Pages/ProductManagement";
