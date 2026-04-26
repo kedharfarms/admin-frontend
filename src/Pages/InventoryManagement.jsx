@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Edit2, Search } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
 import Pagination from '../components/common/Pagination';
 import {
     ResponsiveTable,
