@@ -26,7 +26,8 @@ export function Layout({ children, activeTab, onTabChange }) {
         // { id: 'users', label: 'User Management', icon: Users },
         { id: 'products', label: 'Product Management', icon: Box },
         { id: 'inventory', label: 'Inventory Management', icon: Settings },
-        { id: 'coupons', label: 'Coupon Management', icon: Gift },
+        { id: 'manual-coupon-adjustments', label: 'Manual Coupon Adjustments', icon: Gift },
+        {id: 'coupons', label: 'Coupons', icon: Gift}
     ];
 
     const handleTabClick = (id) => {

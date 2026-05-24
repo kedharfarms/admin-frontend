@@ -59,6 +59,7 @@ export function OrderDetails() {
         created_at,
         total_amount,
         delivery_charges,
+        discount_amount,
         payment_status,
         items = [],
         user,
@@ -157,7 +158,10 @@ export function OrderDetails() {
                     <h3 className="font-medium mb-3">Summary</h3>
 
                     <Row label="Subtotal">
-                        ₹{(total_amount - delivery_charges).toFixed(2)}
+                        ₹{(total_amount - (delivery_charges || 0) + (discount_amount || 0)).toFixed(2)}
+                    </Row>
+                    <Row label="Discount">
+                        ₹{discount_amount.toFixed(2)}
                     </Row>
                     <Row label="Delivery">
                         ₹{delivery_charges.toFixed(2)}
