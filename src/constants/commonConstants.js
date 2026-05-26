@@ -35,3 +35,7 @@ export const ORDER_STATUS = {
     CANCELLED: 'CANCELLED',
     EXPIRED: 'EXPIRED',
 };
+
+export const PLACEMENTS = [
+    'HOME_TOP',
+];

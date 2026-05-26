@@ -110,7 +110,7 @@ export default function OngoingOrders({
     if (isLoading) return <p>Loading...</p>;
 
     return (
-        <div className="bg-white border rounded-lg overflow-hidden">
+        <div className="bg-white border rounded-lg overflow-hidden min-h-[250px]">
             <table className="w-full">
                 <thead className="bg-gray-50 border-b">
                     <tr>    

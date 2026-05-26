@@ -13,6 +13,7 @@ import OngoingDeliveryManagement from "./Pages/OngoingDeliveryManagement";
 import { OrderDetails } from "./Pages/OrderDetails";
 import { SubscriptionDetails } from "./Pages/SubscriptionDetails";
 import { CouponManagement } from "./Pages/CouponManagement";
+import BannerManagement from "./Pages/BannerManagement";
 
 // Protected Route
 const ProtectedRoute = ({ children }) => {
@@ -72,6 +73,7 @@ export default function App() {
           <Route path="inventory" element={<InventoryManagement />} />
           <Route path="manual-coupon-adjustments" element={<ManualCouponAdjustmentManagement />} />
           <Route path="coupons" element={<CouponManagement />} /> 
+          <Route path="banners" element={<BannerManagement />} /> 
         </Route>
 
       </Routes>

@@ -64,6 +64,7 @@ export function OrderDetails() {
         items = [],
         user,
         delivery_address,
+        coupon,
         status_logs = [],
     } = data;
 
@@ -160,8 +161,8 @@ export function OrderDetails() {
                     <Row label="Subtotal">
                         ₹{(total_amount - (delivery_charges || 0) + (discount_amount || 0)).toFixed(2)}
                     </Row>
-                    <Row label="Discount">
-                        ₹{discount_amount.toFixed(2)}
+                    <Row label={`Discount ${coupon ? `(${coupon?.code})` : ""}`}>
+                        -₹{discount_amount.toFixed(2)}
                     </Row>
                     <Row label="Delivery">
                         ₹{delivery_charges.toFixed(2)}
