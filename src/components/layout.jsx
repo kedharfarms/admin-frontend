@@ -9,6 +9,7 @@ import {
     Gift,
     Menu,
     Image,
+    Mail,
     X
 } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
@@ -30,6 +31,7 @@ export function Layout({ children, activeTab, onTabChange }) {
         { id: 'manual-coupon-adjustments', label: 'Manual Coupon Adjustments', icon: Gift },
         {id: 'coupons', label: 'Coupons', icon: Gift},
         {id: 'banners', label: 'Banner Management', icon: Image },
+        {id: 'custom-notifications', label: 'Custom Notifications', icon: Mail},
     ];
 
     const handleTabClick = (id) => {
