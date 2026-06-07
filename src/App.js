@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { LoginPage } from "./components/auth/LoginPage";
 import { UserManagement } from "./components/users/UserManagement";
 import { InventoryManagement } from "./Pages/InventoryManagement";
-import { CouponManagement } from "./Pages/CouponManagement";
+import { ManualCouponAdjustmentManagement } from "./Pages/ManualCouponAdjustmentManagement";
 import { Layout } from "./components/layout";
 import { Outlet, useNavigate } from "react-router-dom";
 import { ProductManagement } from "./Pages/ProductManagement";
@@ -12,6 +12,10 @@ import { SubscriptionManagement } from "./Pages/SubscriptionManagement";
 import OngoingDeliveryManagement from "./Pages/OngoingDeliveryManagement";
 import { OrderDetails } from "./Pages/OrderDetails";
 import { SubscriptionDetails } from "./Pages/SubscriptionDetails";
+import { CouponManagement } from "./Pages/CouponManagement";
+import BannerManagement from "./Pages/BannerManagement";
+import CustomNotification from "./Pages/CustomNotification";
+import HelpPage from "./Pages/HelpPage";
 
 // Protected Route
 const ProtectedRoute = ({ children }) => {
@@ -51,6 +55,8 @@ export default function App() {
         {/* Login */}
         <Route path="/login" element={<LoginWrapper />} />
 
+        <Route path="/help/:section" element={<HelpPage />} />
+
         {/* Protected */}
         <Route
           path="/"
@@ -69,7 +75,10 @@ export default function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="products" element={<ProductManagement />} />
           <Route path="inventory" element={<InventoryManagement />} />
-          <Route path="coupons" element={<CouponManagement />} />
+          <Route path="manual-coupon-adjustments" element={<ManualCouponAdjustmentManagement />} />
+          <Route path="coupons" element={<CouponManagement />} /> 
+          <Route path="banners" element={<BannerManagement />} /> 
+          <Route path="custom-notifications" element={<CustomNotification />} />
         </Route>
 
       </Routes>

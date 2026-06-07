@@ -8,7 +8,7 @@ import { CloseOutlined } from '@ant-design/icons';
 import Pagination from "../components/common/Pagination";
 import DateFilter from "../components/common/DateFilter";
 import { formatISTTime } from "../utils/utils";
-import { getOrderStatusBadge } from "../constants/commonConstants";
+import { DELIVERY_TYPES, getOrderStatusBadge } from "../constants/commonConstants";
 
 export function OrdersView() {
     const BASE_URL = process.env.REACT_APP_API_URL;
@@ -191,7 +191,11 @@ export function OrdersView() {
                                 </td>
                                 <td className="px-4 py-2">{order.order_no}</td>
                                 <td className="px-4 py-2">{order.user_name}</td>
+                                {
+                                    order.delivery_type == DELIVERY_TYPES.STORE_PICKUP? 
+                                <td className="px-4 py-2 text-red-500">Store Pickup</td>:
                                 <td className="px-4 py-2">{order.delivery_address}</td>
+                                }
                                 <td className="px-4 py-2">₹{order.total_amount}</td>
                                 <td className="px-4 py-2">
                                     {formatISTTime(order.created_at)}

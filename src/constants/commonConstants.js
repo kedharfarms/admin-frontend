@@ -35,3 +35,12 @@ export const ORDER_STATUS = {
     CANCELLED: 'CANCELLED',
     EXPIRED: 'EXPIRED',
 };
+
+export const PLACEMENTS = [
+    'HOME_TOP',
+];
+
+export const DELIVERY_TYPES = {
+    HOME_DELIVERY: 'delivery',
+    STORE_PICKUP: 'pickup'
+}

@@ -3,6 +3,7 @@ import axios from "axios";
 import { CheckCircle } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { formatISTTime } from "../utils/utils";
+import { DELIVERY_TYPES } from "../constants/commonConstants";
 
 export function OrderDetails() {
     const { id } = useParams();
@@ -59,11 +60,14 @@ export function OrderDetails() {
         created_at,
         total_amount,
         delivery_charges,
+        discount_amount,
         payment_status,
         items = [],
         user,
         delivery_address,
+        coupon,
         status_logs = [],
+        delivery_type
     } = data;
 
     return (
@@ -104,16 +108,23 @@ export function OrderDetails() {
                     </Card>
 
                     <Card title="Delivery Address">
-                        <p className="font-medium">
-                            {delivery_address?.name}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                            {delivery_address?.house},{" "}
-                            {delivery_address?.street}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                            {delivery_address?.city}
-                        </p>
+                        {
+                            delivery_type == DELIVERY_TYPES.STORE_PICKUP ? 
+                            <p className="font-bold">
+                                Store Pickup
+                            </p> : <>
+                            <p className="font-medium">
+                                {delivery_address?.name}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                                {delivery_address?.house},{" "}
+                                {delivery_address?.street}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                                {delivery_address?.city}
+                            </p>
+                            </>
+                        }
                     </Card>
                 </div>
 
@@ -157,7 +168,10 @@ export function OrderDetails() {
                     <h3 className="font-medium mb-3">Summary</h3>
 
                     <Row label="Subtotal">
-                        ₹{(total_amount - delivery_charges).toFixed(2)}
+                        ₹{(total_amount - (delivery_charges || 0) + (discount_amount || 0)).toFixed(2)}
+                    </Row>
+                    <Row label={`Discount ${coupon ? `(${coupon?.code})` : ""}`}>
+                        -₹{discount_amount.toFixed(2)}
                     </Row>
                     <Row label="Delivery">
                         ₹{delivery_charges.toFixed(2)}
