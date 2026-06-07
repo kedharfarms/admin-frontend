@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AccountDeletion from "../components/Help/AccountDeletion";
 import PrivacyPolicy from "../components/Help/PrivacyPolicy";
+import { useNavigate, useParams } from "react-router-dom";
 
 // import PrivacyPolicy from "../Components/HelpCenter/PrivacyPolicy";
 // import TermsConditions from "../Components/HelpCenter/TermsConditions";
@@ -33,6 +34,19 @@ export default function HelpPage() {
   const [activeSection, setActiveSection] = useState(sections[0]);
 
   const ActiveComponent = activeSection.component;
+    
+  const navigate = useNavigate();
+  const { section } = useParams();
+
+  // Update active section based on URL parameter
+  useEffect(() => {
+    const foundSection = sections.find((s) => s.id === section);
+    if (foundSection) {
+      setActiveSection(foundSection);
+    } else {
+      navigate("/help/account-deletion", { replace: true });
+    }
+  }, [section, navigate]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -52,7 +66,7 @@ export default function HelpPage() {
                 {sections.map((section) => (
                   <li key={section.id}>
                     <button
-                      onClick={() => setActiveSection(section)}
+                      onClick={() => navigate(`/help/${section.id}`)}
                       className={`w-full text-left px-3 py-2 text-sm transition ${
                         activeSection.id === section.id
                           ? "border-l-2 border-green-600 text-black font-medium"
