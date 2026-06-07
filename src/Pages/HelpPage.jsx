@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AccountDeletion from "../components/Help/AccountDeletion";
+import PrivacyPolicy from "../components/Help/PrivacyPolicy";
 
 // import PrivacyPolicy from "../Components/HelpCenter/PrivacyPolicy";
 // import TermsConditions from "../Components/HelpCenter/TermsConditions";
@@ -11,17 +12,17 @@ const sections = [
     title: "Account Deletion",
     component: AccountDeletion,
   },
-  // {
-  //   id: "privacy-policy",
-  //   title: "Privacy Policy",
-  //   component: AccountDeletion,
-  // },
+  {
+    id: "privacy-policy",
+    title: "Privacy Policy",
+    component: PrivacyPolicy,
+  },
   // {
   //   id: "terms",
   //   title: "Terms & Conditions",
   //   component: AccountDeletion,
   // },
-  // {
+  // {git
   //   id: "contact",
   //   title: "Contact Us",
   //   component: ContactUs,
