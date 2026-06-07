@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Pagination from "../common/Pagination";
 import { formatISTTime, populateAddress } from "../../utils/utils";
-import { getOrderStatusBadge, ORDER_STATUS } from "../../constants/commonConstants";
+import { DELIVERY_TYPES, getOrderStatusBadge, ORDER_STATUS } from "../../constants/commonConstants";
 import { FiMoreVertical, FiUserPlus } from 'react-icons/fi';
 import ConfirmationModal from "../common/ConfirmationModal";
 import toast from "react-hot-toast";
@@ -149,9 +149,13 @@ export default function OngoingOrders({
                                 {order?.user?.name}
                             </td>
 
-                            <td className="px-4 py-2 w-80">
-                                {populateAddress(order?.delivery_address)}
-                            </td>
+                            {
+                                order.delivery_type == DELIVERY_TYPES.STORE_PICKUP? 
+                                <td className="px-4 py-2 text-red-500">Store Pickup</td>:
+                                <td className="px-4 py-2 w-80">
+                                    {populateAddress(order?.delivery_address)}
+                                </td>
+                                }
 
 
                             <td className="px-4 py-2 text-center">

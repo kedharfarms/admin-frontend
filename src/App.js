@@ -15,6 +15,7 @@ import { SubscriptionDetails } from "./Pages/SubscriptionDetails";
 import { CouponManagement } from "./Pages/CouponManagement";
 import BannerManagement from "./Pages/BannerManagement";
 import CustomNotification from "./Pages/CustomNotification";
+import HelpPage from "./Pages/HelpPage";
 
 // Protected Route
 const ProtectedRoute = ({ children }) => {
@@ -53,6 +54,8 @@ export default function App() {
 
         {/* Login */}
         <Route path="/login" element={<LoginWrapper />} />
+
+        <Route path="/help/:section" element={<HelpPage />} />
 
         {/* Protected */}
         <Route

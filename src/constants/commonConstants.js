@@ -39,3 +39,8 @@ export const ORDER_STATUS = {
 export const PLACEMENTS = [
     'HOME_TOP',
 ];
+
+export const DELIVERY_TYPES = {
+    HOME_DELIVERY: 'delivery',
+    STORE_PICKUP: 'pickup'
+}

@@ -3,6 +3,7 @@ import axios from "axios";
 import { CheckCircle } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { formatISTTime } from "../utils/utils";
+import { DELIVERY_TYPES } from "../constants/commonConstants";
 
 export function OrderDetails() {
     const { id } = useParams();
@@ -66,6 +67,7 @@ export function OrderDetails() {
         delivery_address,
         coupon,
         status_logs = [],
+        delivery_type
     } = data;
 
     return (
@@ -106,16 +108,23 @@ export function OrderDetails() {
                     </Card>
 
                     <Card title="Delivery Address">
-                        <p className="font-medium">
-                            {delivery_address?.name}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                            {delivery_address?.house},{" "}
-                            {delivery_address?.street}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                            {delivery_address?.city}
-                        </p>
+                        {
+                            delivery_type == DELIVERY_TYPES.STORE_PICKUP ? 
+                            <p className="font-bold">
+                                Store Pickup
+                            </p> : <>
+                            <p className="font-medium">
+                                {delivery_address?.name}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                                {delivery_address?.house},{" "}
+                                {delivery_address?.street}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                                {delivery_address?.city}
+                            </p>
+                            </>
+                        }
                     </Card>
                 </div>
 
