@@ -54,8 +54,16 @@ export default function App() {
 
         {/* Login */}
         <Route path="/login" element={<LoginWrapper />} />
+        
+        <Route
+          path="/help"
+          element={<Navigate to="/help/account-deletion" replace />}
+        />
 
-        <Route path="/help/:section" element={<HelpPage />} />
+        <Route
+          path="/help/:section"
+          element={<HelpPage />}
+        />
 
         {/* Protected */}
         <Route

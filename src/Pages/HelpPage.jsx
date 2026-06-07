@@ -22,7 +22,7 @@ const sections = [
   //   title: "Terms & Conditions",
   //   component: AccountDeletion,
   // },
-  // {git
+  // {
   //   id: "contact",
   //   title: "Contact Us",
   //   component: ContactUs,
