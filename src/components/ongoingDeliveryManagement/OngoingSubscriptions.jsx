@@ -43,6 +43,9 @@ export default function OngoingSubscriptions({
                 url : BASE_URL + `/subscription-management/${selectedSubscription.id}/cancel-delivery`,
                 headers: {
                     Authorization: token
+                },
+                data: {
+                    delivery_slot: selectedSubscription.slot
                 }
             });
             setShowRejectModal(false);
@@ -67,6 +70,9 @@ export default function OngoingSubscriptions({
                 url : BASE_URL + `/subscription-management/${selectedSubscription.id}/mark-delivered`,
                 headers: {
                     Authorization: token
+                },
+                data: {
+                    delivery_slot: selectedSubscription.slot
                 }
             });
             setShowDeliveredModal(false);
@@ -103,8 +109,9 @@ export default function OngoingSubscriptions({
                 </thead>
 
                 <tbody>
-                    {data.map((subscription, index) => (
-                        <tr key={subscription.id} className="hover:bg-gray-50 cursor-pointer"
+                    {data.map((subscription, index) => {
+                        const rowKey = `${subscription.id}-${subscription.slot || 'default'}-${index}`;
+                        return <tr key={rowKey} className="hover:bg-gray-50 cursor-pointer"
                                     onClick={() =>
                                         window.open(`/subscriptions/${subscription.id}`, "_blank")
                                     }
@@ -132,7 +139,7 @@ export default function OngoingSubscriptions({
                             </td>
 
                             <td className="px-4 py-2">
-                                {subscription.delivery_slot?.toUpperCase()}
+                                {subscription.slot?.toUpperCase()}
                             </td>
 
                             <td className="px-4 py-2 w-80">
@@ -154,7 +161,7 @@ export default function OngoingSubscriptions({
                                         className="p-2 rounded hover:bg-gray-200"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            setOpenMenuId(openMenuId === subscription.id ? null : subscription.id);
+                                            setOpenMenuId(openMenuId === rowKey  ? null : rowKey);
                                             setSelectedSubsciption(subscription);
                                         }}
                                     >
@@ -163,7 +170,7 @@ export default function OngoingSubscriptions({
                                 </div>
 
                                 {/* ACTION MENU */}
-                                {openMenuId === subscription.id && (
+                                {openMenuId === rowKey && (
                                 <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-20">
                                     <button
                                     className="flex items-center gap-2 w-full px-4 py-2 hover:bg-gray-100 text-left text-sm"
@@ -192,7 +199,7 @@ export default function OngoingSubscriptions({
                                 )}
                             </td>
                         </tr>
-                    ))}
+                    })}
                 </tbody>
             </table>
             {/* Pagination */}
@@ -221,7 +228,7 @@ export default function OngoingSubscriptions({
                     setSelectedSubsciption(null);
                 }}
                 title="Confirm Cancel Delivery"
-                subtitle={`Move subscription ${selectedSubscription?.subscription_no} to Cancelled?`}
+                subtitle={`Move subscription ${selectedSubscription?.subscription_no} (${selectedSubscription?.slot?.toUpperCase()}) to Cancelled?`}
                 zIndex="z-[60]"
                 isLoading={isExecuting}
                 onConfirm={markRejectedHandler}
@@ -240,7 +247,7 @@ export default function OngoingSubscriptions({
                     setSelectedSubsciption(null);
                 }}
                 title="Confirm Delivered Subscription"
-                subtitle={`Move subscription ${selectedSubscription?.subscription_no} to Delivered?`}
+                subtitle={`Move subscription ${selectedSubscription?.subscription_no} (${selectedSubscription?.slot?.toUpperCase()}) to Delivered?`}
                 zIndex="z-[60]"
                 isLoading={isExecuting}
                 onConfirm={markDeliveredHandler}
