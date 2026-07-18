@@ -54,7 +54,7 @@ export function SubscriptionDetails() {
         price_per_delivery,
         start_date,
         payment_status,
-        delivery_slot,
+        delivery_slots,
         frequency,
         image_url,
         deliveries = [],
@@ -99,8 +99,8 @@ export function SubscriptionDetails() {
                         />
                         <div>
                             <p className="font-medium">{title}</p>
-                            <p className="text-sm text-gray-500">
-                                {frequency} • {delivery_slot}
+                            <p className="text-sm text-gray-500 mt-2">
+                                {frequency.toUpperCase()} - {delivery_slots.map(slot => slot.toUpperCase()).join(', ')}
                             </p>
                         </div>
                     </div>
@@ -191,7 +191,7 @@ export function SubscriptionDetails() {
                                             <p className="text-xs text-gray-500">
                                                 {new Date(
                                                     d.delivery_date
-                                                ).toLocaleDateString()}
+                                                ).toLocaleDateString()} - {d.slot?.toUpperCase()}
                                             </p>
                                             {d.reason && (
                                                 <p className="text-xs text-gray-500">
