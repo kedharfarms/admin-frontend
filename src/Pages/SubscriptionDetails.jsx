@@ -53,6 +53,7 @@ export function SubscriptionDetails() {
         created_at,
         price_per_delivery,
         start_date,
+        end_date,
         payment_status,
         delivery_slots,
         frequency,
@@ -132,8 +133,8 @@ export function SubscriptionDetails() {
                     <div className="bg-white border rounded-xl p-5 shadow-sm">
                         <h3 className="font-medium mb-3">Subscription Info</h3>
 
-                        <Row label="Start Date">
-                            {new Date(start_date).toLocaleDateString()}
+                        <Row label="Subscription Period">
+                            {new Date(start_date).toLocaleDateString()} - {new Date(end_date).toLocaleDateString()}
                         </Row>
                         <Row label="Price / Delivery">
                             ₹{price_per_delivery}

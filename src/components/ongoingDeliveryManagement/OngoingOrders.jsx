@@ -121,7 +121,7 @@ export default function OngoingOrders({
                         <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Customer Name</th>   
                         <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase w-80">Delivery Address</th>
                         <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Order Value</th>
-                        <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Created At</th>
+                        <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Ordered On</th>
                         <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Status</th>    
                         <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Action</th>    
                     </tr>
