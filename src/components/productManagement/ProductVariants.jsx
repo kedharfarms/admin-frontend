@@ -17,6 +17,8 @@ const DEFAULT_FORM = {
     product_id: '',
     unit_quantity: '',
     mrp: '',
+    gst_percentage: '0',
+    hsn_code: '',
     image_urls: [],
 };
 
@@ -66,6 +68,7 @@ export default function ProductVariants({
                     ...form,
                     unit_quantity: Number(form.unit_quantity),
                     mrp: Number(form.mrp),
+                    gst_percentage: Number(form.gst_percentage),
                 },
             });
 
@@ -90,6 +93,8 @@ export default function ProductVariants({
             product_id: variant.product_id || '',
             unit_quantity: variant.unit_quantity || '',
             mrp: variant.mrp || '',
+            gst_percentage: variant.gst_percentage ?? 0,
+            hsn_code: variant.hsn_code || '',
             image_urls: variant.image_urls || [],
         });
 
@@ -111,6 +116,7 @@ export default function ProductVariants({
                     ...editForm,
                     unit_quantity: Number(editForm.unit_quantity),
                     mrp: Number(editForm.mrp),
+                    gst_percentage: Number(editForm.gst_percentage),
                 },
             });
 
@@ -213,6 +219,7 @@ export default function ProductVariants({
                         <TableHeader>Product</TableHeader>
                         <TableHeader>Qty</TableHeader>
                         <TableHeader>MRP</TableHeader>
+                        <TableHeader>GST</TableHeader>
                         <TableHeader>Images</TableHeader>
                         <TableHeader>Status</TableHeader>
                         <TableHeader>Actions</TableHeader>
@@ -222,7 +229,7 @@ export default function ProductVariants({
                 <tbody>
                     {isLoading ? (
                         <tr>
-                            <td colSpan={7} className="py-5 text-center">
+                            <td colSpan={9} className="py-5 text-center">
                                 <div className="flex flex-col items-center justify-center">
                                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
                                     <p className="text-sm text-gray-600">Loading...</p>
@@ -231,7 +238,7 @@ export default function ProductVariants({
                         </tr>
                     ) : variants.length === 0 ? (
                         <tr>
-                            <td colSpan={7} className="py-5 text-center text-gray-500">
+                            <td colSpan={9} className="py-5 text-center text-gray-500">
                                 No Variants found
                             </td>
                         </tr>
@@ -258,6 +265,8 @@ export default function ProductVariants({
                             </TableCell>
 
                             <TableCell>₹{variant.mrp}</TableCell>
+
+                            <TableCell>{variant.gst_percentage ?? 0}%</TableCell>
 
                             <TableCell>
                                 <div className="flex gap-1">
@@ -334,6 +343,22 @@ export default function ProductVariants({
                             value={form.mrp}
                             onChange={(e) => set('mrp', e.target.value)}
                             required
+                        />
+
+                        <Input
+                            label="GST Percentage"
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value={form.gst_percentage}
+                            onChange={(e) => set('gst_percentage', e.target.value)}
+                        />
+
+                        <Input
+                            label="HSN Code"
+                            value={form.hsn_code}
+                            onChange={(e) => set('hsn_code', e.target.value)}
                         />
 
                         <Input
@@ -417,6 +442,22 @@ export default function ProductVariants({
                             value={editForm.mrp}
                             onChange={(e) => setEdit('mrp', e.target.value)}
                             required
+                        />
+
+                        <Input
+                            label="GST Percentage"
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value={editForm.gst_percentage}
+                            onChange={(e) => setEdit('gst_percentage', e.target.value)}
+                        />
+
+                        <Input
+                            label="HSN Code"
+                            value={editForm.hsn_code}
+                            onChange={(e) => setEdit('hsn_code', e.target.value)}
                         />
 
                         <Input

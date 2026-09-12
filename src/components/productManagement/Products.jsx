@@ -192,6 +192,15 @@ export default function Products({
         fetchCategoryOptions();
     }, []);
 
+    useEffect(() => {
+        if (categoryOptions.length === 1) {
+            setForm((prev) => ({
+                ...prev,
+                category_id: prev.category_id || categoryOptions[0].value,
+            }));
+        }
+    }, [categoryOptions]);
+
     return (
         <>
             {/* Header */}

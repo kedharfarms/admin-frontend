@@ -1,284 +1,96 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Edit2, Plus, Trash2 } from 'lucide-react';
 import { mockAdminUsers } from '../../lib/mockData';
+
+const EMPTY_FORM = { username: '', password: '', role: 'user' };
 
 export function UserManagement() {
     const [users, setUsers] = useState(mockAdminUsers);
     const [showModal, setShowModal] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
-    const [formData, setFormData] = useState({
-        username: '',
-        password: '',
-        role: 'user',
-    });
+    const [formData, setFormData] = useState(EMPTY_FORM);
 
-    const handleCreate = () => {
+    const openCreate = () => {
         setEditingUser(null);
-        setFormData({ username: '', password: '', role: 'user' });
+        setFormData(EMPTY_FORM);
         setShowModal(true);
     };
 
-    const handleEdit = (userId) => {
-        const user = users.find(u => u.id === userId);
-        if (user) {
-            setEditingUser(userId);
-            setFormData({
-                username: user.username,
-                password: user.password,
-                role: user.role,
-            });
-            setShowModal(true);
-        }
+    const openEdit = (user) => {
+        setEditingUser(user.id);
+        setFormData({ username: user.username, password: user.password, role: user.role });
+        setShowModal(true);
     };
 
-    const handleDelete = (userId) => {
-        if (window.confirm('Are you sure you want to delete this admin user?')) {
-            setUsers(users.filter(u => u.id !== userId));
-            alert('Admin user deleted successfully');
-        }
-    };
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        if (!formData.username || !formData.password) return;
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (!formData.username || !formData.password) {
-            alert('Please fill all required fields');
-            return;
-        }
-
-        if (editingUser !== null) {
-            // Update existing user
-            setUsers(
-                users.map(u =>
-                    u.id === editingUser
-                        ? {
-                            ...u,
-                            username: formData.username,
-                            password: formData.password,
-                            role: formData.role,
-                        }
-                        : u
-                )
-            );
-            alert('Admin user updated successfully');
+        if (editingUser) {
+            setUsers((currentUsers) => currentUsers.map((user) => user.id === editingUser
+                ? { ...user, ...formData }
+                : user));
         } else {
-            // Create new user
-            const newUser = {
-                id: Math.max(...users.map(u => u.id)) + 1,
-                username: formData.username,
-                password: formData.password,
-                is_active: true,
-                role: formData.role,
-            };
-            setUsers([...users, newUser]);
-            alert('Admin user created successfully');
+            const nextId = Math.max(0, ...users.map((user) => user.id)) + 1;
+            setUsers((currentUsers) => [...currentUsers, { id: nextId, ...formData, is_active: true }]);
         }
 
         setShowModal(false);
-        setFormData({ username: '', password: '', role: 'user' });
+        setFormData(EMPTY_FORM);
     };
 
-    const getRoleBadge = (role) => {
-        const colors = {
-            super_admin: 'bg-purple-100 text-purple-800',
-            admin: 'bg-blue-100 text-blue-800',
-            user: 'bg-gray-100 text-gray-800',
-        };
-        return colors[role] || 'bg-gray-100 text-gray-800';
+    const handleDelete = (id) => {
+        if (window.confirm('Are you sure you want to delete this admin user?')) {
+            setUsers((currentUsers) => currentUsers.filter((user) => user.id !== id));
+        }
     };
 
     return (
         <div className="p-8">
             <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl mb-2">User Management</h1>
-                    <p className="text-gray-600">
-                        Create, edit, and delete admin users
-                    </p>
+                    <h1 className="mb-2 text-3xl">Admin User Management</h1>
+                    <p className="text-gray-600">Create, edit, and delete admin users</p>
                 </div>
-                <button
-                    onClick={handleCreate}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                    <Plus className="w-5 h-5" />
-                    Create Admin User
+                <button onClick={openCreate} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+                    <Plus className="w-5 h-5" /> Create Admin User
                 </button>
             </div>
 
-            {/* Users Table */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">
-                                    ID
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">
-                                    Username
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">
-                                    Role
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-right text-xs text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {users.map(user => (
-                                <tr key={user.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 text-sm text-gray-900">
-                                        {user.id}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-900">
-                                        {user.username}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span
-                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs ${getRoleBadge(
-                                                user.role
-                                            )}`}
-                                        >
-                                            {user.role.replace('_', ' ').toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span
-                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs ${user.is_active
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-red-100 text-red-800'
-                                                }`}
-                                        >
-                                            {user.is_active ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                onClick={() => handleEdit(user.id)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                                                title="Edit"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(user.id)}
-                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                                                title="Delete"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+            <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                <div className="overflow-x-auto"><table className="w-full">
+                    <thead className="border-b border-gray-200 bg-gray-50"><tr>
+                        <th className="px-6 py-3 text-left text-xs uppercase text-gray-500">ID</th>
+                        <th className="px-6 py-3 text-left text-xs uppercase text-gray-500">Username</th>
+                        <th className="px-6 py-3 text-left text-xs uppercase text-gray-500">Role</th>
+                        <th className="px-6 py-3 text-left text-xs uppercase text-gray-500">Status</th>
+                        <th className="px-6 py-3 text-right text-xs uppercase text-gray-500">Actions</th>
+                    </tr></thead>
+                    <tbody className="divide-y divide-gray-200">
+                        {users.map((user) => <tr key={user.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 text-sm">{user.id}</td>
+                            <td className="px-6 py-4 text-sm">{user.username}</td>
+                            <td className="px-6 py-4 text-sm"><span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs text-blue-800">{user.role.replace('_', ' ').toUpperCase()}</span></td>
+                            <td className="px-6 py-4 text-sm"><span className={user.is_active ? 'text-green-700' : 'text-red-700'}>{user.is_active ? 'Active' : 'Inactive'}</span></td>
+                            <td className="px-6 py-4 text-right"><button onClick={() => openEdit(user)} className="mr-2 p-2 text-blue-600"><Edit2 className="w-4 h-4" /></button><button onClick={() => handleDelete(user.id)} className="p-2 text-red-600"><Trash2 className="w-4 h-4" /></button></td>
+                        </tr>)}
+                    </tbody>
+                </table></div>
             </div>
 
-            <div className="mt-4 text-sm text-gray-600">
-                Showing {users.length} admin user(s)
-            </div>
-
-            {/* Create/Edit Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg max-w-md w-full p-6">
-                        <h3 className="text-xl mb-4">
-                            {editingUser !== null
-                                ? 'Edit Admin User'
-                                : 'Create Admin User'}
-                        </h3>
-                        <form onSubmit={handleSubmit}>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm mb-2 text-gray-700">
-                                        Username *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.username}
-                                        onChange={e =>
-                                            setFormData({
-                                                ...formData,
-                                                username: e.target.value,
-                                            })
-                                        }
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm mb-2 text-gray-700">
-                                        Password *
-                                    </label>
-                                    <input
-                                        type="password"
-                                        value={formData.password}
-                                        onChange={e =>
-                                            setFormData({
-                                                ...formData,
-                                                password: e.target.value,
-                                            })
-                                        }
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm mb-2 text-gray-700">
-                                        Role *
-                                    </label>
-                                    <select
-                                        value={formData.role}
-                                        onChange={e =>
-                                            setFormData({
-                                                ...formData,
-                                                role: e.target.value,
-                                            })
-                                        }
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="user">User</option>
-                                        <option value="admin">Admin</option>
-                                        <option value="super_admin">Super Admin</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-2 justify-end mt-6">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowModal(false);
-                                        setFormData({
-                                            username: '',
-                                            password: '',
-                                            role: 'user',
-                                        });
-                                    }}
-                                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                                >
-                                    {editingUser !== null ? 'Update' : 'Create'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+            {showModal && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+                <div className="w-full max-w-md rounded-lg bg-white p-6">
+                    <h2 className="mb-4 text-xl">{editingUser ? 'Edit Admin User' : 'Create Admin User'}</h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <input className="w-full rounded-lg border px-3 py-2" placeholder="Username" value={formData.username} onChange={(event) => setFormData({ ...formData, username: event.target.value })} required />
+                        <input className="w-full rounded-lg border px-3 py-2" type="password" placeholder="Password" value={formData.password} onChange={(event) => setFormData({ ...formData, password: event.target.value })} required />
+                        <select className="w-full rounded-lg border px-3 py-2" value={formData.role} onChange={(event) => setFormData({ ...formData, role: event.target.value })}>
+                            <option value="user">User</option><option value="admin">Admin</option><option value="super_admin">Super Admin</option>
+                        </select>
+                        <div className="flex justify-end gap-2"><button type="button" className="rounded-lg border px-4 py-2" onClick={() => setShowModal(false)}>Cancel</button><button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-white">{editingUser ? 'Update' : 'Create'}</button></div>
+                    </form>
                 </div>
-            )}
+            </div>}
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { LoginPage } from "./components/auth/LoginPage";
-import { UserManagement } from "./components/users/UserManagement";
+import { UserManagement } from "./Pages/UserManagement";
+import { UserManagement as AdminUserManagement } from "./components/users/UserManagement";
 import { InventoryManagement } from "./Pages/InventoryManagement";
 import { ManualCouponAdjustmentManagement } from "./Pages/ManualCouponAdjustmentManagement";
 import { Layout } from "./components/layout";
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="subscriptions" element={<SubscriptionManagement />} />
           <Route path="subscriptions/:id" element={<SubscriptionDetails />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="admin-users" element={<AdminUserManagement />} />
           <Route path="products" element={<ProductManagement />} />
           <Route path="inventory" element={<InventoryManagement />} />
           <Route path="manual-coupon-adjustments" element={<ManualCouponAdjustmentManagement />} />

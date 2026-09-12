@@ -13,6 +13,7 @@ export function OrderDetails() {
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [invoiceLoading, setInvoiceLoading] = useState(false);
 
     const fetchOrderDetails = async (orderId) => {
         try {
@@ -36,6 +37,28 @@ export function OrderDetails() {
     useEffect(() => {
         if (id) fetchOrderDetails(id);
     }, [id]);
+
+    const fetchInvoice = async () => {
+        try {
+            setInvoiceLoading(true);
+
+            const response = await axios.get(
+                `${BASE_URL}/orders/${id}/invoice`,
+                {
+                    headers: { Authorization: token },
+                }
+            );
+            const invoiceUrl = response?.data?.data?.invoice_url;
+
+            if (invoiceUrl) {
+                window.open(invoiceUrl, "_blank", "noopener,noreferrer");
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setInvoiceLoading(false);
+        }
+    };
 
     const getStatusBadge = (status) => {
         const map = {
@@ -67,7 +90,11 @@ export function OrderDetails() {
         delivery_address,
         coupon,
         status_logs = [],
-        delivery_type
+        delivery_type,
+        payment_method,
+        delivered_at,
+        reason,
+        b2b_gstin
     } = data;
 
     return (
@@ -105,6 +132,25 @@ export function OrderDetails() {
                         <p className="text-sm text-gray-500">
                             {user?.phone_number}
                         </p>
+                    </Card>
+
+                    <Card title="Order Information">
+                        <div className="space-y-1 text-sm">
+                            <p><span className="text-gray-500">Delivery:</span> {delivery_type || "-"}</p>
+                            <p><span className="text-gray-500">Payment method:</span> {payment_method || "-"}</p>
+                            <p><span className="text-gray-500">Payment status:</span> {payment_status || "-"}</p>
+                            <p><span className="text-gray-500">Delivered:</span> {delivered_at ? formatISTTime(delivered_at) : "-"}</p>
+                            <p><span className="text-gray-500">GSTIN:</span> {b2b_gstin || "-"}</p>
+                            {reason && <p><span className="text-gray-500">Reason:</span> {reason}</p>}
+                            <button
+                                type="button"
+                                onClick={fetchInvoice}
+                                disabled={invoiceLoading}
+                                className="text-blue-600 hover:underline disabled:text-gray-400"
+                            >
+                                {invoiceLoading ? "Loading invoice..." : "View invoice"}
+                            </button>
+                        </div>
                     </Card>
 
                     <Card title="Delivery Address">
