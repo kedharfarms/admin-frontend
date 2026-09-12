@@ -67,7 +67,7 @@ export function SubscriptionManagement() {
     }, [searchQuery, currentPage]);
 
     return (
-        <div className="p-6">
+        <div className="p-4 md:p-6">
 
             {/* Header */}
             <div className="mb-6">
@@ -105,7 +105,8 @@ export function SubscriptionManagement() {
 
             {/* Table */}
             <div className="bg-white border rounded-lg overflow-hidden">
-                <table className="w-full">
+                <div className="overflow-x-auto">
+                <table className="w-full min-w-[850px]">
                     <thead className="bg-gray-50 border-b">
                         <tr>
                             <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">
@@ -199,6 +200,7 @@ export function SubscriptionManagement() {
                         )}
                     </tbody>
                 </table>
+                </div>
 
                 {isLoading && (
                     <div className="text-center py-4 text-gray-500">

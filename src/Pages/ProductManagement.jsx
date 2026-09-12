@@ -73,6 +73,8 @@ export function ProductManagement() {
             });
             const resData = response?.data?.data;
 
+            console.log(resData)
+
             setData(resData?.data || []);
             setTotalPages(resData?.total_pages || 1);
             setTotalRecords(resData?.total_records || 0);

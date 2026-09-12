@@ -364,6 +364,7 @@ export default function ProductVariants({
                         <Input
                             label="Image URLs (comma separated)"
                             placeholder="https://..., https://..."
+                            value={form.image_urls.join(', ')}
                             onChange={(e) => handleImageChange(e.target.value)}
                         />
 
@@ -463,6 +464,7 @@ export default function ProductVariants({
                         <Input
                             label="Image URLs (comma separated)"
                             placeholder="https://..., https://..."
+                            value={editForm.image_urls.join(', ')}
                             onChange={(e) => handleImageChange(e.target.value, true)}
                         />
 

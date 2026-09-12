@@ -111,7 +111,8 @@ export default function OngoingOrders({
 
     return (
         <div className="bg-white border rounded-lg">
-            <table className="w-full">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px]">
                 <thead className="bg-gray-50 border-b">
                     <tr>    
                         <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">
@@ -233,6 +234,7 @@ export default function OngoingOrders({
                     ))}
                 </tbody>
             </table>
+            </div>
 
             {/* Pagination */}
             {totalPages > 0 && (

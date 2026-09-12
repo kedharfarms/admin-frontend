@@ -112,11 +112,13 @@ export default function Categories({
     const handleEdit = (category) => {
         setSelectedId(category.id);
 
+        const imageUrl = category.image_url || category.image_urls?.[0] || '';
+
         setEditForm({
             name: category.name || '',
             description: category.description || '',
             parent_id: category.parent_id || '',
-            image_url: category.image_url || '',
+            image_url: imageUrl,
             is_opening_soon: category.is_opening_soon || false,
         });
 
@@ -244,6 +246,7 @@ export default function Categories({
                     ) : null}
                     {categories.map((category, index) => {
                         const parent = category?.parent;
+                        const imageUrl = category.image_url || category.image_urls?.[0];
                         return (
                             <TableRow key={category.id}>
                                 <TableCell>{
@@ -251,9 +254,9 @@ export default function Categories({
                                 }</TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        {category.image_url && (
+                                        {imageUrl && (
                                             <img
-                                                src={category.image_url}
+                                                src={imageUrl}
                                                 alt={category.name}
                                                 className="w-7 h-7 rounded object-cover"
                                             />

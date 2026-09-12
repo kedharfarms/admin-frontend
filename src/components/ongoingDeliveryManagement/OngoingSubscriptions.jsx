@@ -91,8 +91,9 @@ export default function OngoingSubscriptions({
     if (isLoading) return <p>Loading...</p>;
 
     return (
-        <div className="bg-white border rounded-lg overflow-hidden min-h-[250px]">
-            <table className="w-full">
+        <div className="bg-white border rounded-lg min-h-[250px]">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px]">
                 <thead className="bg-gray-50 border-b">
                     <tr>
                         <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">
@@ -202,6 +203,7 @@ export default function OngoingSubscriptions({
                     })}
                 </tbody>
             </table>
+            </div>
             {/* Pagination */}
             {totalPages > 0 && (
                 <div className="px-4 py-1 border-t bg-gray-50">

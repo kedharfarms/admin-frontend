@@ -192,8 +192,8 @@ export function ManualCouponAdjustmentManagement() {
     };
 
     return (
-        <div className="p-8">
-            <div className="flex flex-row items-center justify-between mb-6">
+        <div className="p-4 md:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold mb-2">
                         Manual Coupon Adjustments
@@ -211,7 +211,8 @@ export function ManualCouponAdjustmentManagement() {
 
             {/* TABLE */}
             <div className="bg-white border rounded-lg overflow-hidden">
-                <table className="w-full">
+                <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px]">
                     <thead className="bg-gray-50">
                         <tr className="bg-gray-100">
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
@@ -292,11 +293,12 @@ export function ManualCouponAdjustmentManagement() {
                         )}
                     </tbody>
                 </table>
+                </div>
             </div>
             {/* PAGINATION */}
             {totalPages > 0 && (
                 <div className="px-4 py-1 border-t border-gray-200 bg-gray-50">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="text-sm text-gray-600">
                             Showing{' '}
                             <span className="font-medium">
@@ -326,7 +328,7 @@ export function ManualCouponAdjustmentManagement() {
                 <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
                     <form
                         onSubmit={handleSubmit}
-                        className="bg-white w-[420px] rounded-2xl shadow-xl p-6 space-y-5"
+                        className="bg-white w-[calc(100%-2rem)] max-w-[420px] max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl p-6 space-y-5"
                     >
                         <h2 className="text-xl font-semibold text-gray-800">
                             Create Adjustment

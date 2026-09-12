@@ -88,7 +88,7 @@ export function OrdersView() {
     };
 
     return (
-        <div className="p-6">
+        <div className="p-4 md:p-6">
 
             {/* Header */}
             <div className="mb-6">
@@ -98,7 +98,7 @@ export function OrdersView() {
 
             {/* Filters */}
             <div className="bg-white p-4 rounded-lg border mb-6">
-                <div className="flex flex-row gap-4">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
 
                     {/* Status */}
                     <select
@@ -107,7 +107,7 @@ export function OrdersView() {
                             setCurrentPage(1);
                             setStatusFilter(e.target.value);
                         }}
-                        className="px-3 py-2 border rounded-lg w-[200px]"
+                        className="px-3 py-2 border rounded-lg w-full sm:w-[200px]"
                     >
                         <option value="ALL">All</option>
                         <option value="PROCESSING">Processing</option>
@@ -119,7 +119,7 @@ export function OrdersView() {
                     </select>
 
                     {/* Search */}
-                    <div className="relative">
+                    <div className="relative w-full sm:w-[240px]">
                         <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
                         <input
                             type="text"
@@ -164,7 +164,8 @@ export function OrdersView() {
 
             {/* Table */}
             <div className="bg-white border rounded-lg overflow-hidden">
-                <table className="w-full">
+                <div className="overflow-x-auto">
+                <table className="w-full min-w-[850px]">
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-4 py-2 text-left">S.No</th>
@@ -225,12 +226,13 @@ export function OrdersView() {
                         ) : null}
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {/* Pagination */}
             {totalPages > 0 && (
                 <div className="px-4 py-1 border-t border-gray-200 bg-gray-50">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="text-sm text-gray-600">
                         Showing <span className="font-medium">{pageSize}</span> rows per page
                         <span className="mx-2">•</span>

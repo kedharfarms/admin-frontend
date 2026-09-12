@@ -42,7 +42,6 @@ export function Layout({ children, activeTab, onTabChange }) {
 
     const handleLogout = () => {
         localStorage.removeItem("token");
-
         navigate("/login");
     };
 
@@ -50,21 +49,28 @@ export function Layout({ children, activeTab, onTabChange }) {
         <div className="flex h-screen bg-gray-50 overflow-hidden">
 
             {/* Sidebar */}
+            {sidebarOpen && (
+                <button
+                    aria-label="Close navigation"
+                    onClick={() => setSidebarOpen(false)}
+                    className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+                />
+            )}
             <aside
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 className={`
-                    fixed lg:static z-50 h-full
+                    fixed top-0 left-0 lg:static z-50 w-full max-h-[85vh]
                     bg-[#7CA126] text-white flex flex-col
                     transition-all duration-300
-                    ${isHovered ? 'w-64' : 'w-20'}
-                    ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                    lg:translate-x-0
+                    ${sidebarOpen ? 'translate-y-0' : '-translate-y-full'}
+                    ${isHovered ? 'lg:w-64' : 'lg:w-20'}
+                    lg:h-full lg:max-h-none lg:translate-y-0
                 `}
             >
                 {/* Header */}
                 <div className="p-4 border-b border-[#94BF30] flex items-center justify-between">
-                    {isHovered && (
+                    {(isHovered || sidebarOpen) && (
                         <div>
                             <h1 className="text-lg font-bold text-white">KedharFarms</h1>
                             <p className="text-xs text-white">Admin</p>
@@ -80,7 +86,7 @@ export function Layout({ children, activeTab, onTabChange }) {
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 py-4">
+                <nav className="max-h-[calc(85vh-80px)] flex-1 overflow-y-auto py-4 lg:max-h-none">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = activeTab === item.id;
@@ -103,7 +109,7 @@ export function Layout({ children, activeTab, onTabChange }) {
                                     className={`
                                         text-sm font-medium whitespace-nowrap
                                         transition-opacity duration-200
-                                        ${isHovered ? 'opacity-100' : 'opacity-0'}
+                                        ${isHovered || sidebarOpen ? 'opacity-100' : 'opacity-0'}
                                     `}
                                 >
                                     {item.label}
@@ -119,7 +125,7 @@ export function Layout({ children, activeTab, onTabChange }) {
                     >
                         {/* You can use any icon */}
                         <span className="text-sm font-medium">
-                            {isHovered ? "Logout" : "⏻"}
+                            {isHovered || sidebarOpen ? "Logout" : "⏻"}
                         </span>
                     </button>
                 </div>
