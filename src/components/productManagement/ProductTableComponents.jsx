@@ -45,11 +45,16 @@ export function StatusBadge({ active }) {
     );
 }
 
-export function Modal({ title, children, onClose, disabled }) {
+const MODAL_SIZES = {
+    md: 'max-w-md',
+    lg: 'max-w-2xl',
+};
+
+export function Modal({ title, children, onClose, disabled, size = 'md' }) {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
-                className="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col"
+                className={`bg-white rounded-lg w-full ${MODAL_SIZES[size] || MODAL_SIZES.md} max-h-[90vh] flex flex-col`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header (fixed) */}

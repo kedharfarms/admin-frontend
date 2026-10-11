@@ -9,6 +9,8 @@ import {
     Input, SelectInput, Textarea
 } from './ProductTableComponents';
 
+import ComboItemsBuilder from './ComboItemsBuilder';
+import { PRODUCT_TYPE } from '../../constants/commonConstants.js';
 import Pagination from '../common/Pagination';
 
 const DEFAULT_FORM = {
@@ -17,9 +19,11 @@ const DEFAULT_FORM = {
     product_id: '',
     unit_quantity: '',
     mrp: '',
+    strikethrough_mrp: '',
     gst_percentage: '0',
     hsn_code: '',
     image_urls: [],
+    combo_items: [],
 };
 
 export default function ProductVariants({
@@ -53,9 +57,27 @@ export default function ProductVariants({
     const setEdit = (field, value) =>
         setEditForm((prev) => ({ ...prev, [field]: value }));
 
+    const isComboProduct = (productId) =>
+        productOptions.find((p) => String(p.value) === String(productId))?.product_type === PRODUCT_TYPE.COMBO;
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
+
+        const is_combo = isComboProduct(form.product_id);
+
+        if (is_combo && form.combo_items.length === 0) {
+            toast.error('Add at least one item to the combo');
+            return;
+        }
+
+        if (
+            form.strikethrough_mrp !== '' &&
+            (!Number.isFinite(Number(form.strikethrough_mrp)) || Number(form.strikethrough_mrp) <= Number(form.mrp))
+        ) {
+            toast.error('Strikethrough MRP must be greater than MRP');
+            return;
+        }
 
         try {
             setIsSubmitting(true);
@@ -66,9 +88,16 @@ export default function ProductVariants({
                 headers: { Authorization: token },
                 data: {
                     ...form,
-                    unit_quantity: Number(form.unit_quantity),
+                    unit_quantity: is_combo ? 1 : Number(form.unit_quantity),
                     mrp: Number(form.mrp),
+                    strikethrough_mrp: form.strikethrough_mrp === '' ? null : Number(form.strikethrough_mrp),
                     gst_percentage: Number(form.gst_percentage),
+                    combo_items: is_combo
+                        ? form.combo_items.map(({ component_variant_id, quantity }) => ({
+                            component_variant_id,
+                            quantity,
+                        }))
+                        : undefined,
                 },
             });
 
@@ -93,9 +122,15 @@ export default function ProductVariants({
             product_id: variant.product_id || '',
             unit_quantity: variant.unit_quantity || '',
             mrp: variant.mrp || '',
+            strikethrough_mrp: variant.strikethrough_mrp ?? '',
             gst_percentage: variant.gst_percentage ?? 0,
             hsn_code: variant.hsn_code || '',
             image_urls: variant.image_urls || [],
+            combo_items: (variant.combo_items || []).map((item) => ({
+                component_variant_id: item.component_variant_id,
+                quantity: item.quantity,
+                label: `${item.component_variant?.name || ''} (${item.component_variant?.product?.name || ''})`,
+            })),
         });
 
         setShowEditModal(true);
@@ -104,6 +139,21 @@ export default function ProductVariants({
     const handleUpdate = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
+
+        const is_combo = isComboProduct(editForm.product_id);
+
+        if (is_combo && editForm.combo_items.length === 0) {
+            toast.error('Add at least one item to the combo');
+            return;
+        }
+
+        if (
+            editForm.strikethrough_mrp !== '' &&
+            (!Number.isFinite(Number(editForm.strikethrough_mrp)) || Number(editForm.strikethrough_mrp) <= Number(editForm.mrp))
+        ) {
+            toast.error('Strikethrough MRP must be greater than MRP');
+            return;
+        }
 
         try {
             setIsSubmitting(true);
@@ -114,9 +164,16 @@ export default function ProductVariants({
                 headers: { Authorization: token },
                 data: {
                     ...editForm,
-                    unit_quantity: Number(editForm.unit_quantity),
+                    unit_quantity: is_combo ? 1 : Number(editForm.unit_quantity),
                     mrp: Number(editForm.mrp),
+                    strikethrough_mrp: editForm.strikethrough_mrp === '' ? null : Number(editForm.strikethrough_mrp),
                     gst_percentage: Number(editForm.gst_percentage),
+                    combo_items: is_combo
+                        ? editForm.combo_items.map(({ component_variant_id, quantity }) => ({
+                            component_variant_id,
+                            quantity,
+                        }))
+                        : undefined,
                 },
             });
 
@@ -172,10 +229,16 @@ export default function ProductVariants({
                 headers: { Authorization: token },
             });
 
-            const options = (response?.data?.data || []).map((p) => ({
-                label: `${p.name} (${p.base_unit})`,
-                value: p.id,
-            }));
+            const options = (response?.data?.data || []).map((p) => {
+                const details = p.product_type === PRODUCT_TYPE.COMBO ? 'Combo' : p.base_unit;
+                const category = p.category?.name;
+
+                return {
+                    label: category ? `${p.name} (${category}, ${details})` : `${p.name} (${details})`,
+                    value: p.id,
+                    product_type: p.product_type,
+                };
+            });
 
             setProductOptions(options);
         } catch (error) {
@@ -261,10 +324,21 @@ export default function ProductVariants({
                             </TableCell>
 
                             <TableCell>
-                                {variant.unit_quantity} {variant.product?.base_unit}
+                                {variant.product?.product_type === PRODUCT_TYPE.COMBO ? (
+                                    <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
+                                        Combo ({variant.combo_items?.length || 0} items)
+                                    </span>
+                                ) : (
+                                    `${variant.unit_quantity} ${variant.product?.base_unit || ''}`
+                                )}
                             </TableCell>
 
-                            <TableCell>₹{variant.mrp}</TableCell>
+                            <TableCell>
+                                {variant.strikethrough_mrp && (
+                                    <div className="text-xs text-gray-500 line-through">₹{variant.strikethrough_mrp}</div>
+                                )}
+                                ₹{variant.mrp}
+                            </TableCell>
 
                             <TableCell>{variant.gst_percentage ?? 0}%</TableCell>
 
@@ -299,6 +373,7 @@ export default function ProductVariants({
             {showModal && (
                 <Modal
                     title="Add Product Variant"
+                    size="lg"
                     disabled={isSubmitting}
                     onClose={() => {
                         setShowModal(false);
@@ -329,13 +404,21 @@ export default function ProductVariants({
                             required
                         />
 
-                        <Input
-                            label="Unit Quantity *"
-                            type="number"
-                            value={form.unit_quantity}
-                            onChange={(e) => set('unit_quantity', e.target.value)}
-                            required
-                        />
+                        {isComboProduct(form.product_id) ? (
+                            <ComboItemsBuilder
+                                items={form.combo_items}
+                                onChange={(items) => set('combo_items', items)}
+                                productOptions={productOptions}
+                            />
+                        ) : (
+                            <Input
+                                label="Unit Quantity *"
+                                type="number"
+                                value={form.unit_quantity}
+                                onChange={(e) => set('unit_quantity', e.target.value)}
+                                required
+                            />
+                        )}
 
                         <Input
                             label="MRP *"
@@ -346,20 +429,33 @@ export default function ProductVariants({
                         />
 
                         <Input
-                            label="GST Percentage"
+                            label="Strikethrough MRP"
                             type="number"
-                            min="0"
-                            max="100"
+                            min={form.mrp || undefined}
                             step="0.01"
-                            value={form.gst_percentage}
-                            onChange={(e) => set('gst_percentage', e.target.value)}
+                            value={form.strikethrough_mrp}
+                            onChange={(e) => set('strikethrough_mrp', e.target.value)}
                         />
 
-                        <Input
-                            label="HSN Code"
-                            value={form.hsn_code}
-                            onChange={(e) => set('hsn_code', e.target.value)}
-                        />
+                        {!isComboProduct(form.product_id) && (
+                            <>
+                                <Input
+                                    label="GST Percentage"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                    value={form.gst_percentage}
+                                    onChange={(e) => set('gst_percentage', e.target.value)}
+                                />
+
+                                <Input
+                                    label="HSN Code"
+                                    value={form.hsn_code}
+                                    onChange={(e) => set('hsn_code', e.target.value)}
+                                />
+                            </>
+                        )}
 
                         <Input
                             label="Image URLs (comma separated)"
@@ -398,6 +494,7 @@ export default function ProductVariants({
             {showEditModal && (
                 <Modal
                     title="Edit Product Variant"
+                    size="lg"
                     disabled={isSubmitting}
                     onClose={() => {
                         setShowEditModal(false);
@@ -429,13 +526,21 @@ export default function ProductVariants({
                             required
                         />
 
-                        <Input
-                            label="Unit Quantity *"
-                            type="number"
-                            value={editForm.unit_quantity}
-                            onChange={(e) => setEdit('unit_quantity', e.target.value)}
-                            required
-                        />
+                        {isComboProduct(editForm.product_id) ? (
+                            <ComboItemsBuilder
+                                items={editForm.combo_items}
+                                onChange={(items) => setEdit('combo_items', items)}
+                                productOptions={productOptions}
+                            />
+                        ) : (
+                            <Input
+                                label="Unit Quantity *"
+                                type="number"
+                                value={editForm.unit_quantity}
+                                onChange={(e) => setEdit('unit_quantity', e.target.value)}
+                                required
+                            />
+                        )}
 
                         <Input
                             label="MRP *"
@@ -446,20 +551,33 @@ export default function ProductVariants({
                         />
 
                         <Input
-                            label="GST Percentage"
+                            label="Strikethrough MRP"
                             type="number"
-                            min="0"
-                            max="100"
+                            min={editForm.mrp || undefined}
                             step="0.01"
-                            value={editForm.gst_percentage}
-                            onChange={(e) => setEdit('gst_percentage', e.target.value)}
+                            value={editForm.strikethrough_mrp}
+                            onChange={(e) => setEdit('strikethrough_mrp', e.target.value)}
                         />
 
-                        <Input
-                            label="HSN Code"
-                            value={editForm.hsn_code}
-                            onChange={(e) => setEdit('hsn_code', e.target.value)}
-                        />
+                        {!isComboProduct(editForm.product_id) && (
+                            <>
+                                <Input
+                                    label="GST Percentage"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                    value={editForm.gst_percentage}
+                                    onChange={(e) => setEdit('gst_percentage', e.target.value)}
+                                />
+
+                                <Input
+                                    label="HSN Code"
+                                    value={editForm.hsn_code}
+                                    onChange={(e) => setEdit('hsn_code', e.target.value)}
+                                />
+                            </>
+                        )}
 
                         <Input
                             label="Image URLs (comma separated)"
