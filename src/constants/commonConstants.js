@@ -1,7 +1,17 @@
 
+export const PRODUCT_TYPE = {
+    SIMPLE: 'simple',
+    COMBO: 'combo',
+};
+
 export const unitOptions = [
     { label: 'Liter (ltr)', value: 'ltr' },
     { label: 'Kilogram (kg)', value: 'kg' },
+];
+
+export const productTypeOptions = [
+    { label: 'Simple Product', value: PRODUCT_TYPE.SIMPLE },
+    { label: 'Combo', value: PRODUCT_TYPE.COMBO },
 ];
 
 export const getSubscriptionStatusBadge = (status) => {

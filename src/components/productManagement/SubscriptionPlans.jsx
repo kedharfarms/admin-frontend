@@ -15,6 +15,7 @@ const DEFAULT_FORM = {
     title: '',
     sub_title: '',
     price_per_delivery: '',
+    strikethrough_mrp: '',
     validity_days: '',
     frequency: '',
     category_id: '',
@@ -53,6 +54,14 @@ export default function SubscriptionPlans({
         e.preventDefault();
         if (isSubmitting) return;
 
+        if (
+            form.strikethrough_mrp !== '' &&
+            (!Number.isFinite(Number(form.strikethrough_mrp)) || Number(form.strikethrough_mrp) <= Number(form.price_per_delivery))
+        ) {
+            toast.error('Strikethrough MRP must be greater than price per delivery');
+            return;
+        }
+
         try {
             setIsSubmitting(true);
 
@@ -61,6 +70,7 @@ export default function SubscriptionPlans({
                 {
                     ...form,
                     price_per_delivery: Number(form.price_per_delivery),
+                    strikethrough_mrp: form.strikethrough_mrp === '' ? null : Number(form.strikethrough_mrp),
                     validity_days: Number(form.validity_days),
                 },
                 { headers: { Authorization: token } }
@@ -81,6 +91,14 @@ export default function SubscriptionPlans({
         e.preventDefault();
         if (isSubmitting) return;
 
+        if (
+            editForm.strikethrough_mrp !== '' &&
+            (!Number.isFinite(Number(editForm.strikethrough_mrp)) || Number(editForm.strikethrough_mrp) <= Number(editForm.price_per_delivery))
+        ) {
+            toast.error('Strikethrough MRP must be greater than price per delivery');
+            return;
+        }
+
         try {
             setIsSubmitting(true);
 
@@ -89,6 +107,7 @@ export default function SubscriptionPlans({
                 {
                     ...editForm,
                     price_per_delivery: Number(editForm.price_per_delivery),
+                    strikethrough_mrp: editForm.strikethrough_mrp === '' ? null : Number(editForm.strikethrough_mrp),
                     validity_days: Number(editForm.validity_days),
                 },
                 { headers: { Authorization: token } }
@@ -179,7 +198,12 @@ export default function SubscriptionPlans({
                             <TableCell>{i + 1}</TableCell>
                             <TableCell>{plan.title}-{plan.sub_title}</TableCell>
                             <TableCell>{plan.category?.name}</TableCell>
-                            <TableCell>₹{plan.price_per_delivery}</TableCell>
+                            <TableCell>
+                                {plan.strikethrough_mrp && (
+                                    <div className="text-xs text-gray-500 line-through">₹{plan.strikethrough_mrp}</div>
+                                )}
+                                ₹{plan.price_per_delivery}
+                            </TableCell>
                             <TableCell>{plan.validity_days}</TableCell>
                             <TableCell>{plan.frequency}</TableCell>
                             <TableCell>
@@ -255,6 +279,15 @@ export default function SubscriptionPlans({
                             value={form.price_per_delivery}
                             onChange={(e) => set('price_per_delivery', e.target.value)}
                             required
+                        />
+
+                        <Input
+                            label="Strikethrough MRP"
+                            type="number"
+                            min={form.price_per_delivery || undefined}
+                            step="0.01"
+                            value={form.strikethrough_mrp}
+                            onChange={(e) => set('strikethrough_mrp', e.target.value)}
                         />
 
                         <Input
@@ -382,6 +415,15 @@ export default function SubscriptionPlans({
                             value={editForm.price_per_delivery}
                             onChange={(e) => setEdit('price_per_delivery', e.target.value)}
                             required
+                        />
+
+                        <Input
+                            label="Strikethrough MRP"
+                            type="number"
+                            min={editForm.price_per_delivery || undefined}
+                            step="0.01"
+                            value={editForm.strikethrough_mrp ?? ''}
+                            onChange={(e) => setEdit('strikethrough_mrp', e.target.value)}
                         />
 
                         <Input

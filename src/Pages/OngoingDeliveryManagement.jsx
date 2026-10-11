@@ -10,8 +10,8 @@ import OngoingSubscriptions from "../components/ongoingDeliveryManagement/Ongoin
 import { useSearchParams } from "react-router-dom";
 
 const TABS = [
-    { key: "subscriptions", label: "Subscriptions" },
     { key: "orders", label: "Orders" },
+    { key: "subscriptions", label: "Subscriptions" },
 ];
 
 export default function OngoingDeliveryManagement() {
@@ -21,7 +21,7 @@ export default function OngoingDeliveryManagement() {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [activeTab, setActiveTab] = useState(
-        searchParams.get("tab") || "subscriptions"
+        searchParams.get("tab") || "orders"
     );
 
     const [searchQuery, setSearchQuery] = useState(

@@ -10,12 +10,13 @@ import {
 } from './ProductTableComponents.jsx';
 
 import Pagination from '../common/Pagination';
-import { unitOptions } from '../../constants/commonConstants.js';
+import { unitOptions, productTypeOptions, PRODUCT_TYPE } from '../../constants/commonConstants.js';
 
 const DEFAULT_FORM = {
     name: '',
     category_id: '',
     base_unit: 'ltr',
+    product_type: PRODUCT_TYPE.SIMPLE,
 };
 
 export default function Products({
@@ -62,7 +63,8 @@ export default function Products({
                 data: {
                     name: form.name,
                     category_id: form.category_id,
-                    base_unit: form.base_unit,
+                    base_unit: form.product_type === PRODUCT_TYPE.COMBO ? null : form.base_unit,
+                    product_type: form.product_type,
                 },
             });
 
@@ -88,6 +90,7 @@ export default function Products({
             name: product.name || '',
             category_id: product.category_id || '',
             base_unit: product.base_unit || 'ltr',
+            product_type: product.product_type || PRODUCT_TYPE.SIMPLE,
         });
 
         setShowEditModal(true);
@@ -109,7 +112,8 @@ export default function Products({
                 data: {
                     name: editForm.name,
                     category_id: editForm.category_id,
-                    base_unit: editForm.base_unit,
+                    base_unit: editForm.product_type === PRODUCT_TYPE.COMBO ? null : editForm.base_unit,
+                    product_type: editForm.product_type,
                 },
             });
 
@@ -222,6 +226,7 @@ export default function Products({
                         <TableHeader>ID</TableHeader>
                         <TableHeader>Name</TableHeader>
                         <TableHeader>Category</TableHeader>
+                        <TableHeader>Type</TableHeader>
                         <TableHeader>Base Unit</TableHeader>
                         <TableHeader>Status</TableHeader>
                         <TableHeader>Actions</TableHeader>
@@ -231,7 +236,7 @@ export default function Products({
                 <tbody>
                     {isLoading ? (
                         <tr>
-                            <td colSpan={6} className="py-5 text-center">
+                            <td colSpan={7} className="py-5 text-center">
                                 <div className="flex flex-col items-center">
                                     <div className="animate-spin h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
                                     Loading...
@@ -240,7 +245,7 @@ export default function Products({
                         </tr>
                     ) : products.length === 0 ? (
                         <tr>
-                            <td colSpan={6} className="py-5 text-center text-gray-500">
+                            <td colSpan={7} className="py-5 text-center text-gray-500">
                                 No products found
                             </td>
                         </tr>
@@ -260,9 +265,23 @@ export default function Products({
                                 </TableCell>
 
                                 <TableCell>
-                                    <span className="px-2 py-1 text-xs bg-blue-100 rounded">
-                                        {product.base_unit}
+                                    <span className={`px-2 py-1 text-xs rounded ${
+                                        product.product_type === PRODUCT_TYPE.COMBO
+                                            ? 'bg-purple-100 text-purple-800'
+                                            : 'bg-gray-100 text-gray-700'
+                                    }`}>
+                                        {product.product_type === PRODUCT_TYPE.COMBO ? 'Combo' : 'Simple'}
                                     </span>
+                                </TableCell>
+
+                                <TableCell>
+                                    {product.product_type === PRODUCT_TYPE.COMBO ? (
+                                        '—'
+                                    ) : (
+                                        <span className="px-2 py-1 text-xs bg-blue-100 rounded">
+                                            {product.base_unit}
+                                        </span>
+                                    )}
                                 </TableCell>
 
                                 <TableCell>
@@ -294,7 +313,7 @@ export default function Products({
 
             {/* CREATE MODAL */}
             {showModal && (
-                <Modal title="Add Product" onClose={() => setShowModal(false)}>
+                <Modal title="Add Product" size="lg" onClose={() => setShowModal(false)}>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <Input
                             label="Product Name"
@@ -312,11 +331,20 @@ export default function Products({
                         />
 
                         <SelectInput
-                            label="Base Unit"
-                            value={form.base_unit}
-                            onChange={(e) => set('base_unit', e.target.value)}
-                            options={unitOptions}
+                            label="Product Type"
+                            value={form.product_type}
+                            onChange={(e) => set('product_type', e.target.value)}
+                            options={productTypeOptions}
                         />
+
+                        {form.product_type !== PRODUCT_TYPE.COMBO && (
+                            <SelectInput
+                                label="Base Unit"
+                                value={form.base_unit}
+                                onChange={(e) => set('base_unit', e.target.value)}
+                                options={unitOptions}
+                            />
+                        )}
 
                         <button
                             type="submit"
@@ -331,7 +359,7 @@ export default function Products({
 
             {/* EDIT MODAL */}
             {showEditModal && (
-                <Modal title="Edit Product" onClose={() => setShowEditModal(false)}>
+                <Modal title="Edit Product" size="lg" onClose={() => setShowEditModal(false)}>
                     <form onSubmit={handleUpdate} className="space-y-4">
                         <Input
                             label="Product Name"
@@ -351,13 +379,24 @@ export default function Products({
                         />
 
                         <SelectInput
-                            label="Base Unit"
-                            value={editForm.base_unit}
+                            label="Product Type"
+                            value={editForm.product_type}
                             onChange={(e) =>
-                                setEditForm({ ...editForm, base_unit: e.target.value })
+                                setEditForm({ ...editForm, product_type: e.target.value })
                             }
-                            options={unitOptions}
+                            options={productTypeOptions}
                         />
+
+                        {editForm.product_type !== PRODUCT_TYPE.COMBO && (
+                            <SelectInput
+                                label="Base Unit"
+                                value={editForm.base_unit}
+                                onChange={(e) =>
+                                    setEditForm({ ...editForm, base_unit: e.target.value })
+                                }
+                                options={unitOptions}
+                            />
+                        )}
 
                         <button className="w-full bg-blue-600 text-white py-2 rounded">
                             Update

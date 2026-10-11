@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { formatISTTime } from "../utils/utils";
 import { DELIVERY_TYPES } from "../constants/commonConstants";
@@ -14,6 +14,19 @@ export function OrderDetails() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [invoiceLoading, setInvoiceLoading] = useState(false);
+    const [expandedItemIds, setExpandedItemIds] = useState(new Set());
+
+    const toggleExpanded = (itemId) => {
+        setExpandedItemIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(itemId)) {
+                next.delete(itemId);
+            } else {
+                next.add(itemId);
+            }
+            return next;
+        });
+    };
 
     const fetchOrderDetails = async (orderId) => {
         try {
@@ -79,6 +92,7 @@ export function OrderDetails() {
 
     const {
         order_no,
+        order_source,
         current_status,
         created_at,
         total_amount,
@@ -128,17 +142,18 @@ export function OrderDetails() {
                 {/* CUSTOMER + ADDRESS */}
                 <div className="grid md:grid-cols-2 gap-6">
                     <Card title="Customer">
-                        <p className="font-medium">{user?.name}</p>
+                        <p className="font-medium">{order_source === "OFFLINE" ? "Walk-in sale" : user?.name}</p>
                         <p className="text-sm text-gray-500">
-                            {user?.phone_number}
+                            {order_source === "OFFLINE" ? "No customer details recorded" : user?.phone_number}
                         </p>
                     </Card>
 
                     <Card title="Order Information">
                         <div className="space-y-1 text-sm">
-                            <p><span className="text-gray-500">Delivery:</span> {delivery_type || "-"}</p>
+                            <p><span className="text-gray-500">Order type:</span> {order_source === "OFFLINE" ? "Offline sale" : "Online order"}</p>
+                            {order_source !== "OFFLINE" && <p><span className="text-gray-500">Delivery:</span> {delivery_type || "-"}</p>}
                             <p><span className="text-gray-500">Payment method:</span> {payment_method || "-"}</p>
-                            <p><span className="text-gray-500">Payment status:</span> {payment_status || "-"}</p>
+                            {order_source !== "OFFLINE" && <p><span className="text-gray-500">Payment status:</span> {payment_status || "-"}</p>}
                             <p><span className="text-gray-500">Delivered:</span> {delivered_at ? formatISTTime(delivered_at) : "-"}</p>
                             <p><span className="text-gray-500">GSTIN:</span> {b2b_gstin || "-"}</p>
                             {reason && <p><span className="text-gray-500">Reason:</span> {reason}</p>}
@@ -153,9 +168,10 @@ export function OrderDetails() {
                         </div>
                     </Card>
 
-                    <Card title="Delivery Address">
-                        {
-                            delivery_type == DELIVERY_TYPES.STORE_PICKUP ? 
+                    <Card title={order_source === "OFFLINE" ? "Fulfillment" : "Delivery Address"}>
+                        {order_source === "OFFLINE" ? (
+                            <p className="font-medium">Walk-in · delivered at point of sale</p>
+                        ) : delivery_type === DELIVERY_TYPES.STORE_PICKUP ?
                             <p className="font-bold">
                                 Store Pickup
                             </p> : <>
@@ -179,33 +195,83 @@ export function OrderDetails() {
                     <h3 className="font-medium mb-4">Items</h3>
 
                     <div className="divide-y">
-                        {items.map((item) => (
-                            <div
-                                key={item.id}
-                                className="flex justify-between py-3"
-                            >
-                                <div className="flex gap-3">
-                                    <img
-                                        src={item.image_url}
-                                        className="w-12 h-12 rounded-lg object-cover"
-                                    />
+                        {items.map((item) => {
+                            const hasSubItems = item.sub_items?.length > 0;
+                            const isExpanded = expandedItemIds.has(item.id);
 
-                                    <div>
+                            return (
+                                <div key={item.id}>
+                                    <div
+                                        className={`flex justify-between py-3 ${hasSubItems ? "cursor-pointer" : ""}`}
+                                        onClick={hasSubItems ? () => toggleExpanded(item.id) : undefined}
+                                    >
+                                        <div className="flex gap-3">
+                                            {hasSubItems && (
+                                                isExpanded
+                                                    ? <ChevronDown className="w-4 h-4 mt-1 text-gray-400 shrink-0" />
+                                                    : <ChevronRight className="w-4 h-4 mt-1 text-gray-400 shrink-0" />
+                                            )}
+
+                                            <img
+                                                src={item.image_url}
+                                                className="w-12 h-12 rounded-lg object-cover"
+                                            />
+
+                                            <div>
+                                                <p className="font-medium">
+                                                    {item.name}
+                                                    {hasSubItems && (
+                                                        <span className="ml-2 text-xs font-normal text-purple-700 bg-purple-100 px-2 py-0.5 rounded">
+                                                            Combo · {item.sub_items.length} items
+                                                        </span>
+                                                    )}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    {item.unit_quantity} kg ×{" "}
+                                                    {item.quantity}
+                                                </p>
+                                            </div>
+                                        </div>
+
                                         <p className="font-medium">
-                                            {item.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {item.unit_quantity} kg ×{" "}
-                                            {item.quantity}
+                                            ₹{(item.mrp * item.quantity).toFixed(2)}
                                         </p>
                                     </div>
-                                </div>
 
-                                <p className="font-medium">
-                                    ₹{(item.mrp * item.quantity).toFixed(2)}
-                                </p>
-                            </div>
-                        ))}
+                                    {hasSubItems && isExpanded && (
+                                        <div className="pl-9 pb-3 space-y-2">
+                                            {item.sub_items.map((subItem) => (
+                                                <div
+                                                    key={subItem.id}
+                                                    className="flex justify-between items-center bg-gray-50 rounded-lg px-3 py-2"
+                                                >
+                                                    <div className="flex gap-3 items-center">
+                                                        <img
+                                                            src={subItem.image_url}
+                                                            className="w-9 h-9 rounded-lg object-cover"
+                                                        />
+
+                                                        <div>
+                                                            <p className="text-sm font-medium">
+                                                                {subItem.name}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">
+                                                                {subItem.unit_quantity} kg ×{" "}
+                                                                {subItem.quantity}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <p className="text-sm text-gray-600">
+                                                        ₹{(subItem.mrp * subItem.quantity).toFixed(2)}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -214,19 +280,19 @@ export function OrderDetails() {
                     <h3 className="font-medium mb-3">Summary</h3>
 
                     <Row label="Subtotal">
-                        ₹{(total_amount - (delivery_charges || 0) + (discount_amount || 0)).toFixed(2)}
+                        ₹{(Number(total_amount || 0) - Number(delivery_charges || 0) + Number(discount_amount || 0)).toFixed(2)}
                     </Row>
                     <Row label={`Discount ${coupon ? `(${coupon?.code})` : ""}`}>
-                        -₹{discount_amount.toFixed(2)}
+                        -₹{Number(discount_amount || 0).toFixed(2)}
                     </Row>
                     <Row label="Delivery">
-                        ₹{delivery_charges.toFixed(2)}
+                        ₹{Number(delivery_charges || 0).toFixed(2)}
                     </Row>
                     <Row label="Total" bold>
-                        ₹{total_amount.toFixed(2)}
+                        ₹{Number(total_amount || 0).toFixed(2)}
                     </Row>
                     <Row label="Payment">
-                        {payment_status}
+                        {order_source === "OFFLINE" ? "Paid" : payment_status || "-"}
                     </Row>
                 </div>
             </div>
