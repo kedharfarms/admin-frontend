@@ -88,6 +88,7 @@ export default function ProductVariants({
                 headers: { Authorization: token },
                 data: {
                     ...form,
+                    is_combo,
                     unit_quantity: is_combo ? 1 : Number(form.unit_quantity),
                     mrp: Number(form.mrp),
                     strikethrough_mrp: form.strikethrough_mrp === '' ? null : Number(form.strikethrough_mrp),
