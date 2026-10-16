@@ -47,6 +47,14 @@ export default function Products({
     const set = (field, value) =>
         setForm((prev) => ({ ...prev, [field]: value }));
 
+    const openCreateModal = () => {
+        setForm({
+            ...DEFAULT_FORM,
+            category_id: categoryOptions[0]?.value ?? '',
+        });
+        setShowModal(true);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
@@ -197,7 +205,7 @@ export default function Products({
     }, []);
 
     useEffect(() => {
-        if (categoryOptions.length === 1) {
+        if (categoryOptions.length > 0) {
             setForm((prev) => ({
                 ...prev,
                 category_id: prev.category_id || categoryOptions[0].value,
@@ -210,7 +218,7 @@ export default function Products({
             {/* Header */}
             <div className="mb-4 flex justify-end items-center">
                 <button
-                    onClick={() => setShowModal(true)}
+                    onClick={openCreateModal}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                     <Plus className="w-5 h-5" />
@@ -327,6 +335,7 @@ export default function Products({
                             value={form.category_id}
                             onChange={(e) => set('category_id', e.target.value)}
                             options={categoryOptions}
+                            placeholder="Select Category"
                             required
                         />
 
