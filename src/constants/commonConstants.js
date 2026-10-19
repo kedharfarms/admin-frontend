@@ -7,6 +7,7 @@ export const PRODUCT_TYPE = {
 export const unitOptions = [
     { label: 'Liter (ltr)', value: 'ltr' },
     { label: 'Kilogram (kg)', value: 'kg' },
+    { label: 'Pieces', value: 'pieces' },
 ];
 
 export const productTypeOptions = [
