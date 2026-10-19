@@ -12,6 +12,7 @@ import {
 import ComboItemsBuilder from './ComboItemsBuilder';
 import { PRODUCT_TYPE } from '../../constants/commonConstants.js';
 import Pagination from '../common/Pagination';
+import CloudinaryImageUpload from './CloudinaryImageUpload';
 
 const DEFAULT_FORM = {
     name: '',
@@ -50,6 +51,7 @@ export default function ProductVariants({
 
     const [productOptions, setProductOptions] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
 
     const set = (field, value) =>
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -63,8 +65,22 @@ export default function ProductVariants({
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
+        if (isUploadingImage) {
+            toast.error('Wait for the image upload to finish');
+            return;
+        }
 
         const is_combo = isComboProduct(form.product_id);
+
+        if (
+            (!is_combo && Number(form.unit_quantity) < 0) ||
+            Number(form.mrp) < 0 ||
+            (form.strikethrough_mrp !== '' && Number(form.strikethrough_mrp) < 0) ||
+            Number(form.gst_percentage) < 0
+        ) {
+            toast.error('Unit quantity, prices, and GST percentage cannot be negative');
+            return;
+        }
 
         if (is_combo && form.combo_items.length === 0) {
             toast.error('Add at least one item to the combo');
@@ -140,8 +156,22 @@ export default function ProductVariants({
     const handleUpdate = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
+        if (isUploadingImage) {
+            toast.error('Wait for the image upload to finish');
+            return;
+        }
 
         const is_combo = isComboProduct(editForm.product_id);
+
+        if (
+            (!is_combo && Number(editForm.unit_quantity) < 0) ||
+            Number(editForm.mrp) < 0 ||
+            (editForm.strikethrough_mrp !== '' && Number(editForm.strikethrough_mrp) < 0) ||
+            Number(editForm.gst_percentage) < 0
+        ) {
+            toast.error('Unit quantity, prices, and GST percentage cannot be negative');
+            return;
+        }
 
         if (is_combo && editForm.combo_items.length === 0) {
             toast.error('Add at least one item to the combo');
@@ -251,16 +281,6 @@ export default function ProductVariants({
         fetchProductOptions();
     }, []);
 
-    const handleImageChange = (value, isEdit = false) => {
-        const urls = value.split(',').map((u) => u.trim()).filter(Boolean);
-
-        if (isEdit) {
-            setEdit('image_urls', urls);
-        } else {
-            set('image_urls', urls);
-        }
-    };
-
     return (
         <>
             {/* Header */}
@@ -315,7 +335,7 @@ export default function ProductVariants({
 
                             <TableCell>
                                 <div className="font-medium">{variant.name}</div>
-                                <div className="text-xs text-gray-500">
+                                <div className="w-[180px] max-w-[70vw] whitespace-normal break-words text-xs text-gray-500 sm:w-[220px] lg:w-[280px]">
                                     {variant.description}
                                 </div>
                             </TableCell>
@@ -415,6 +435,8 @@ export default function ProductVariants({
                             <Input
                                 label="Unit Quantity *"
                                 type="number"
+                                min="0"
+                                step="any"
                                 value={form.unit_quantity}
                                 onChange={(e) => set('unit_quantity', e.target.value)}
                                 required
@@ -424,6 +446,8 @@ export default function ProductVariants({
                         <Input
                             label="MRP *"
                             type="number"
+                            min="0"
+                            step="any"
                             value={form.mrp}
                             onChange={(e) => set('mrp', e.target.value)}
                             required
@@ -432,8 +456,8 @@ export default function ProductVariants({
                         <Input
                             label="Strikethrough MRP"
                             type="number"
-                            min={form.mrp || undefined}
-                            step="0.01"
+                            min="0"
+                            step="any"
                             value={form.strikethrough_mrp}
                             onChange={(e) => set('strikethrough_mrp', e.target.value)}
                         />
@@ -445,7 +469,7 @@ export default function ProductVariants({
                                     type="number"
                                     min="0"
                                     max="100"
-                                    step="0.01"
+                                    step="any"
                                     value={form.gst_percentage}
                                     onChange={(e) => set('gst_percentage', e.target.value)}
                                 />
@@ -458,17 +482,19 @@ export default function ProductVariants({
                             </>
                         )}
 
-                        <Input
-                            label="Image URLs (comma separated)"
-                            placeholder="https://..., https://..."
-                            value={form.image_urls.join(', ')}
-                            onChange={(e) => handleImageChange(e.target.value)}
+                        <CloudinaryImageUpload
+                            value={form.image_urls}
+                            onChange={(imageUrls) => set('image_urls', imageUrls)}
+                            multiple
+                            baseUrl={BASE_URL}
+                            token={token}
+                            onUploadingChange={setIsUploadingImage}
                         />
 
                         <div className="flex gap-2 pt-2">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploadingImage}
                                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Creating...' : 'Create Variant'}
@@ -537,6 +563,8 @@ export default function ProductVariants({
                             <Input
                                 label="Unit Quantity *"
                                 type="number"
+                                min="0"
+                                step="any"
                                 value={editForm.unit_quantity}
                                 onChange={(e) => setEdit('unit_quantity', e.target.value)}
                                 required
@@ -546,6 +574,8 @@ export default function ProductVariants({
                         <Input
                             label="MRP *"
                             type="number"
+                            min="0"
+                            step="any"
                             value={editForm.mrp}
                             onChange={(e) => setEdit('mrp', e.target.value)}
                             required
@@ -554,8 +584,8 @@ export default function ProductVariants({
                         <Input
                             label="Strikethrough MRP"
                             type="number"
-                            min={editForm.mrp || undefined}
-                            step="0.01"
+                            min="0"
+                            step="any"
                             value={editForm.strikethrough_mrp}
                             onChange={(e) => setEdit('strikethrough_mrp', e.target.value)}
                         />
@@ -567,7 +597,7 @@ export default function ProductVariants({
                                     type="number"
                                     min="0"
                                     max="100"
-                                    step="0.01"
+                                    step="any"
                                     value={editForm.gst_percentage}
                                     onChange={(e) => setEdit('gst_percentage', e.target.value)}
                                 />
@@ -580,17 +610,19 @@ export default function ProductVariants({
                             </>
                         )}
 
-                        <Input
-                            label="Image URLs (comma separated)"
-                            placeholder="https://..., https://..."
-                            value={editForm.image_urls.join(', ')}
-                            onChange={(e) => handleImageChange(e.target.value, true)}
+                        <CloudinaryImageUpload
+                            value={editForm.image_urls}
+                            onChange={(imageUrls) => setEdit('image_urls', imageUrls)}
+                            multiple
+                            baseUrl={BASE_URL}
+                            token={token}
+                            onUploadingChange={setIsUploadingImage}
                         />
 
                         <div className="flex gap-2 pt-2">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploadingImage}
                                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Updating...' : 'Update Variant'}
