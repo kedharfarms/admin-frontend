@@ -10,6 +10,7 @@ import {
 } from './ProductTableComponents';
 
 import Pagination from '../common/Pagination';
+import CloudinaryImageUpload from './CloudinaryImageUpload';
 
 const DEFAULT_FORM = {
     title: '',
@@ -46,6 +47,7 @@ export default function SubscriptionPlans({
 
     const [categoryOptions, setCategoryOptions] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
 
     const set = (f, v) => setForm(plan => ({ ...plan, [f]: v }));
     const setEdit = (f, v) => setEditForm(plan => ({ ...plan, [f]: v }));
@@ -53,6 +55,18 @@ export default function SubscriptionPlans({
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
+        if (isUploadingImage) {
+            toast.error('Wait for the image upload to finish');
+            return;
+        }
+
+        if (
+            Number(form.price_per_delivery) < 0 ||
+            (form.strikethrough_mrp !== '' && Number(form.strikethrough_mrp) < 0)
+        ) {
+            toast.error('Prices cannot be negative');
+            return;
+        }
 
         if (
             form.strikethrough_mrp !== '' &&
@@ -90,6 +104,18 @@ export default function SubscriptionPlans({
     const handleUpdate = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
+        if (isUploadingImage) {
+            toast.error('Wait for the image upload to finish');
+            return;
+        }
+
+        if (
+            Number(editForm.price_per_delivery) < 0 ||
+            (editForm.strikethrough_mrp !== '' && Number(editForm.strikethrough_mrp) < 0)
+        ) {
+            toast.error('Prices cannot be negative');
+            return;
+        }
 
         if (
             editForm.strikethrough_mrp !== '' &&
@@ -161,11 +187,6 @@ export default function SubscriptionPlans({
     useEffect(() => {
         fetchCategoryOptions();
     }, []);
-
-    const handleImageChange = (val, isEdit = false) => {
-        const urls = val.split(',').map(x => x.trim()).filter(Boolean);
-        isEdit ? setEdit('image_urls', urls) : set('image_urls', urls);
-    };
 
     return (
         <>
@@ -276,6 +297,8 @@ export default function SubscriptionPlans({
                         <Input
                             label="Price Per Delivery *"
                             type="number"
+                            min="0"
+                            step="any"
                             value={form.price_per_delivery}
                             onChange={(e) => set('price_per_delivery', e.target.value)}
                             required
@@ -284,8 +307,8 @@ export default function SubscriptionPlans({
                         <Input
                             label="Strikethrough MRP"
                             type="number"
-                            min={form.price_per_delivery || undefined}
-                            step="0.01"
+                            min="0"
+                            step="any"
                             value={form.strikethrough_mrp}
                             onChange={(e) => set('strikethrough_mrp', e.target.value)}
                         />
@@ -320,16 +343,19 @@ export default function SubscriptionPlans({
                             required
                         />
 
-                        <Input
-                            label="Image URLs (comma separated)"
-                            placeholder="https://..., https://..."
-                            onChange={(e) => handleImageChange(e.target.value)}
+                        <CloudinaryImageUpload
+                            value={form.image_urls}
+                            onChange={(imageUrls) => set('image_urls', imageUrls)}
+                            multiple
+                            baseUrl={BASE_URL}
+                            token={token}
+                            onUploadingChange={setIsUploadingImage}
                         />
 
                         <div className="flex gap-2 pt-2">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploadingImage}
                                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Creating...' : 'Create Plan'}
@@ -412,6 +438,8 @@ export default function SubscriptionPlans({
                         <Input
                             label="Price Per Delivery *"
                             type="number"
+                            min="0"
+                            step="any"
                             value={editForm.price_per_delivery}
                             onChange={(e) => setEdit('price_per_delivery', e.target.value)}
                             required
@@ -420,8 +448,8 @@ export default function SubscriptionPlans({
                         <Input
                             label="Strikethrough MRP"
                             type="number"
-                            min={editForm.price_per_delivery || undefined}
-                            step="0.01"
+                            min="0"
+                            step="any"
                             value={editForm.strikethrough_mrp ?? ''}
                             onChange={(e) => setEdit('strikethrough_mrp', e.target.value)}
                         />
@@ -456,17 +484,19 @@ export default function SubscriptionPlans({
                             required
                         />
 
-                        <Input
-                            label="Image URLs (comma separated)"
-                            value={(editForm.image_urls || []).join(', ')}
-                            placeholder="https://..., https://..."
-                            onChange={(e) => handleImageChange(e.target.value, true)}
+                        <CloudinaryImageUpload
+                            value={editForm.image_urls}
+                            onChange={(imageUrls) => setEdit('image_urls', imageUrls)}
+                            multiple
+                            baseUrl={BASE_URL}
+                            token={token}
+                            onUploadingChange={setIsUploadingImage}
                         />
 
                         <div className="flex gap-2 pt-2">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploadingImage}
                                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Updating...' : 'Update Plan'}

@@ -9,6 +9,7 @@ import {
 } from './ProductTableComponents';
 import Pagination from '../common/Pagination';
 import axios from 'axios';
+import CloudinaryImageUpload from './CloudinaryImageUpload';
 
 const DEFAULT_FORM = {
     name: '',
@@ -34,6 +35,7 @@ export default function Categories({
     const [showModal, setShowModal] = useState(false);
     const [form, setForm]           = useState(DEFAULT_FORM);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [parentOptions, setParentOptions] = useState([]);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editForm, setEditForm] = useState(DEFAULT_FORM);
@@ -46,6 +48,10 @@ export default function Categories({
         e.preventDefault();
 
         if (isSubmitting) return;
+        if (isUploadingImage) {
+            toast.error('Wait for the image upload to finish');
+            return;
+        }
 
         try {
             setIsSubmitting(true);
@@ -129,6 +135,10 @@ export default function Categories({
         e.preventDefault();
 
         if (isSubmitting) return;
+        if (isUploadingImage) {
+            toast.error('Wait for the image upload to finish');
+            return;
+        }
 
         try {
             setIsSubmitting(true);
@@ -336,11 +346,12 @@ export default function Categories({
                             options={parentOptions}
                             placeholder="None (Root category)"
                         />
-                        <Input
-                            label="Image URL"
+                        <CloudinaryImageUpload
                             value={form.image_url}
-                            onChange={(e) => set('image_url', e.target.value)}
-                            placeholder="https://..."
+                            onChange={(imageUrl) => set('image_url', imageUrl)}
+                            baseUrl={BASE_URL}
+                            token={token}
+                            onUploadingChange={setIsUploadingImage}
                         />
                         <Toggle
                             label="Opening Soon"
@@ -350,7 +361,7 @@ export default function Categories({
                         <div className="flex gap-2 pt-2">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploadingImage}
                                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Creating...' : 'Create Category'}
@@ -405,10 +416,12 @@ export default function Categories({
                             placeholder="None (Root category)"
                         />
 
-                        <Input
-                            label="Image URL"
+                        <CloudinaryImageUpload
                             value={editForm.image_url}
-                            onChange={(e) => setEditForm(prev => ({ ...prev, image_url: e.target.value }))}
+                            onChange={(imageUrl) => setEditForm(prev => ({ ...prev, image_url: imageUrl }))}
+                            baseUrl={BASE_URL}
+                            token={token}
+                            onUploadingChange={setIsUploadingImage}
                         />
 
                         <Toggle
@@ -420,7 +433,7 @@ export default function Categories({
                         <div className="flex gap-2 pt-2">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploadingImage}
                                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Updating...' : 'Update Category'}

@@ -84,6 +84,11 @@ export function InventoryManagement() {
         e.preventDefault();
         if (isSubmitting) return;
 
+        if (!Number.isFinite(Number(quantity)) || Number(quantity) < 0) {
+            toast.error('Available quantity cannot be negative');
+            return;
+        }
+
         try {
             setIsSubmitting(true);
 
@@ -246,6 +251,8 @@ export function InventoryManagement() {
                         <Input
                             label="Available Quantity *"
                             type="number"
+                            min="0"
+                            step="any"
                             value={quantity}
                             onChange={(e) => setQuantity(e.target.value)}
                             required
