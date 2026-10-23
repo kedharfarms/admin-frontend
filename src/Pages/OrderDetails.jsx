@@ -227,7 +227,7 @@ export function OrderDetails() {
                                                     )}
                                                 </p>
                                                 <p className="text-xs text-gray-500">
-                                                    {item.unit_quantity} kg ×{" "}
+                                                    {item.unit_quantity} {item.base_unit || "kg"} ×{" "}
                                                     {item.quantity}
                                                 </p>
                                             </div>
@@ -256,7 +256,7 @@ export function OrderDetails() {
                                                                 {subItem.name}
                                                             </p>
                                                             <p className="text-xs text-gray-500">
-                                                                {subItem.unit_quantity} kg ×{" "}
+                                                                {subItem.unit_quantity} {subItem.base_unit || "kg"} ×{" "}
                                                                 {subItem.quantity}
                                                             </p>
                                                         </div>
