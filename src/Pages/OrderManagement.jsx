@@ -360,7 +360,14 @@ export function OrdersView() {
                                 <td className="px-4 py-2 text-red-500">Store Pickup</td>:
                                 <td className="px-4 py-2">{order.delivery_address}</td>
                                 }
-                                <td className="px-4 py-2">₹{order.total_amount}</td>
+                                <td className="px-4 py-2">
+                                    <div>₹{Math.max(0, Number(order.total_amount || 0) - Number(order.wallet_amount_used || 0))}</div>
+                                    {Number(order.wallet_amount_used || 0) > 0 && (
+                                        <div className="text-xs text-gray-500">
+                                            Wallet Amount −₹{Number(order.wallet_amount_used).toFixed(2)}
+                                        </div>
+                                    )}
+                                </td>
                                 <td className="px-4 py-2">
                                     {formatISTTime(order.created_at)}
                                 </td>

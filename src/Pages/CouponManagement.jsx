@@ -1,23 +1,33 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
     Plus,
     Search,
+    Pencil,
     Trash2,
 } from 'lucide-react';
 import { CloseOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 
 import Pagination from '../components/common/Pagination';
-import DateFilter from '../components/common/DateFilter';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 import { formatISTTime } from '../utils/utils';
+
+const toDateTimeLocal = (value) => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
+};
 
 export function CouponManagement() {
     const BASE_URL = process.env.REACT_APP_API_URL;
     const token = localStorage.getItem('token');
 
     const [coupons, setCoupons] = useState([]);
+    const [categories, setCategories] = useState([]);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] =
@@ -54,6 +64,7 @@ export function CouponManagement() {
         name: '',
         description: '',
         coupon_type: 'cart_flat',
+        category_id: '',
         discount_value: '',
         min_order_amount: '',
         max_discount_amount: '',
@@ -70,6 +81,29 @@ export function CouponManagement() {
         searchQuery,
         statusFilter,
     ]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await axios({
+                    method: 'GET',
+                    url: `${BASE_URL}/product-management/categories/options`,
+                    headers: {
+                        Authorization: token,
+                    },
+                });
+                setCategories(res?.data?.data || []);
+            } catch (error) {
+                toast.error(
+                    error?.response?.data?.message ||
+                    error.message ||
+                    'Unable to load categories'
+                );
+            }
+        };
+
+        fetchCategories();
+    }, [BASE_URL, token]);
 
     const fetchCoupons = async () => {
         if (isLoading) return;
@@ -138,6 +172,9 @@ export function CouponManagement() {
                 name: formData.name,
                 description: formData.description,
                 coupon_type: formData.coupon_type,
+                category_id: formData.category_id
+                    ? Number(formData.category_id)
+                    : null,
                 discount_value: Number(
                     formData.discount_value
                 ),
@@ -169,29 +206,32 @@ export function CouponManagement() {
                     formData.valid_from || null,
                 valid_until:
                     formData.valid_until || null,
-                is_active: true,
             };
 
             await axios({
-                method: 'POST',
-                url: BASE_URL + '/coupons',
-                data: data,
+                method: selectedCoupon ? 'PUT' : 'POST',
+                url: selectedCoupon
+                    ? `${BASE_URL}/coupons/${selectedCoupon.id}`
+                    : `${BASE_URL}/coupons`,
+                data: selectedCoupon ? data : { ...data, is_active: true },
                 headers: {
                     Authorization: token,
                 },
             });
 
-            toast.success(
-                'Coupon created successfully'
-            );
+            toast.success(selectedCoupon
+                ? 'Coupon updated successfully'
+                : 'Coupon created successfully');
 
             setShowModal(false);
+            setSelectedCoupon(null);
 
             setFormData({
                 code: '',
                 name: '',
                 description: '',
                 coupon_type: 'cart_flat',
+                category_id: '',
                 discount_value: '',
                 min_order_amount: '',
                 max_discount_amount: '',
@@ -211,6 +251,44 @@ export function CouponManagement() {
         } finally {
             setIsExecuting(false);
         }
+    };
+
+    const openCreateModal = () => {
+        setSelectedCoupon(null);
+        setFormData({
+            code: '',
+            name: '',
+            description: '',
+            coupon_type: 'cart_flat',
+            category_id: '',
+            discount_value: '',
+            min_order_amount: '',
+            max_discount_amount: '',
+            usage_limit: '',
+            usage_per_user: 1,
+            valid_from: '',
+            valid_until: '',
+        });
+        setShowModal(true);
+    };
+
+    const openEditModal = (coupon) => {
+        setSelectedCoupon(coupon);
+        setFormData({
+            code: coupon.code || '',
+            name: coupon.name || '',
+            description: coupon.description || '',
+            coupon_type: coupon.coupon_type || 'cart_flat',
+            category_id: coupon.category_id ?? '',
+            discount_value: coupon.discount_value ?? '',
+            min_order_amount: coupon.min_order_amount ?? 0,
+            max_discount_amount: coupon.max_discount_amount ?? '',
+            usage_limit: coupon.usage_limit ?? '',
+            usage_per_user: coupon.usage_per_user ?? 1,
+            valid_from: toDateTimeLocal(coupon.valid_from),
+            valid_until: toDateTimeLocal(coupon.valid_until),
+        });
+        setShowModal(true);
     };
 
     const handleDelete = async () => {
@@ -265,7 +343,7 @@ export function CouponManagement() {
                 </div>
 
                 <button
-                    onClick={() => setShowModal(true)}
+                    onClick={openCreateModal}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                     <Plus size={16} />
@@ -362,6 +440,10 @@ export function CouponManagement() {
                             </th>
 
                             <th className="px-4 py-3 text-left">
+                                Category
+                            </th>
+
+                            <th className="px-4 py-3 text-left">
                                 Discount Value
                             </th>
 
@@ -408,6 +490,14 @@ export function CouponManagement() {
                                     </td>
 
                                     <td className="px-4 py-3">
+                                        {coupon.category_id
+                                            ? categories.find(
+                                                (category) => Number(category.id) === Number(coupon.category_id)
+                                            )?.name || 'Selected category'
+                                            : 'All categories'}
+                                    </td>
+
+                                    <td className="px-4 py-3">
                                         {
                                             coupon.discount_value
                                         }
@@ -436,19 +526,25 @@ export function CouponManagement() {
                                     </td>
 
                                     <td className="px-4 py-3 text-center">
-                                        <button
-                                            onClick={() => {
-                                                setSelectedCoupon(
-                                                    coupon
-                                                );
-
-                                                setShowDeleteModal(
-                                                    true
-                                                );
-                                            }}
-                                        >
-                                            <Trash2 className="w-4 h-4 text-red-600" />
-                                        </button>
+                                        <div className="flex items-center justify-center gap-3">
+                                            <button
+                                                type="button"
+                                                title="Edit coupon"
+                                                onClick={() => openEditModal(coupon)}
+                                            >
+                                                <Pencil className="w-4 h-4 text-blue-600" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                title="Delete coupon"
+                                                onClick={() => {
+                                                    setSelectedCoupon(coupon);
+                                                    setShowDeleteModal(true);
+                                                }}
+                                            >
+                                                <Trash2 className="w-4 h-4 text-red-600" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             )
@@ -523,7 +619,7 @@ export function CouponManagement() {
                 </div>
             )}
 
-            {/* CREATE MODAL */}
+            {/* CREATE / EDIT MODAL */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4">
                     <form
@@ -533,11 +629,11 @@ export function CouponManagement() {
                         {/* FIXED HEADER */}
                         <div className="px-6 py-5 border-b bg-white sticky top-0 z-10">
                             <h2 className="text-xl font-semibold text-gray-800">
-                                Create Coupon
+                                {selectedCoupon ? 'Edit Coupon' : 'Create Coupon'}
                             </h2>
 
                             <p className="text-sm text-gray-500 mt-1">
-                                Create and manage platform coupons
+                                {selectedCoupon ? 'Update coupon details' : 'Create and manage platform coupons'}
                             </p>
                         </div>
 
@@ -616,6 +712,32 @@ export function CouponManagement() {
                                             Subscription Percentage
                                         </option>
                                     </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 mb-1">
+                                        Applies To
+                                    </label>
+                                    <select
+                                        value={formData.category_id}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                category_id: e.target.value,
+                                            })
+                                        }
+                                        className="w-full border rounded-lg p-2.5"
+                                    >
+                                        <option value="">All categories</option>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {category.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Cart coupons apply to products in this category; subscription coupons apply to plans in this category.
+                                    </p>
                                 </div>
 
                                 {/* DISCOUNT */}
@@ -793,9 +915,10 @@ export function CouponManagement() {
                             <div className="flex justify-end gap-3">
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        setShowModal(false)
-                                    }
+                                    onClick={() => {
+                                        setShowModal(false);
+                                        setSelectedCoupon(null);
+                                    }}
                                     className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"
                                 >
                                     Cancel
@@ -807,8 +930,8 @@ export function CouponManagement() {
                                     className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
                                 >
                                     {isExecuting
-                                        ? 'Creating...'
-                                        : 'Create Coupon'}
+                                        ? (selectedCoupon ? 'Updating...' : 'Creating...')
+                                        : (selectedCoupon ? 'Update Coupon' : 'Create Coupon')}
                                 </button>
                             </div>
                         </div>
