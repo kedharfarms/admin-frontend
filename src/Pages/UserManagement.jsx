@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { Edit2 } from 'lucide-react';
 import Pagination from '../components/common/Pagination';
 
 const formatAddress = (address) => [
@@ -20,6 +21,9 @@ export function UserManagement() {
     const [isLoading, setIsLoading] = useState(false);
     const [userOptions, setUserOptions] = useState([]);
     const [selectedReferrerId, setSelectedReferrerId] = useState('');
+    const [walletUser, setWalletUser] = useState(null);
+    const [walletBalanceInput, setWalletBalanceInput] = useState('');
+    const [isSavingWallet, setIsSavingWallet] = useState(false);
     const pageSize = 10;
 
     const fetchUsers = useCallback(async () => {
@@ -70,6 +74,43 @@ export function UserManagement() {
         setCurrentPage(1);
     };
 
+    const openWalletEditor = (user) => {
+        setWalletUser(user);
+        setWalletBalanceInput(String(Number(user.wallet_balence || 0)));
+    };
+
+    const saveWalletBalance = async (event) => {
+        event.preventDefault();
+        const walletBalance = Number(walletBalanceInput);
+
+        if (!walletBalanceInput.trim() || !Number.isFinite(walletBalance) || walletBalance < 0) {
+            toast.error('Enter a valid non-negative wallet balance');
+            return;
+        }
+
+        try {
+            setIsSavingWallet(true);
+            await axios({
+                method: 'PUT',
+                url: `${BASE_URL}/user-management/${walletUser.id}/wallet-balance`,
+                data: { wallet_balance: walletBalance },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setUsers((currentUsers) => currentUsers.map((user) => (
+                user.id === walletUser.id
+                    ? { ...user, wallet_balence: walletBalance }
+                    : user
+            )));
+            toast.success('Wallet balance updated');
+            setWalletUser(null);
+        } catch (error) {
+            toast.error(error?.response?.data?.message || error.message);
+        } finally {
+            setIsSavingWallet(false);
+        }
+    };
+
     return (
         <div className="p-6">
             <div className="mb-6">
@@ -87,7 +128,7 @@ export function UserManagement() {
                     <option value="">All users</option>
                     {userOptions.map((user) => (
                         <option key={user.id} value={user.id}>
-                            {`${user.name || 'Unnamed user'} - ${user.phone_number || 'No phone number'}`}
+                            {(user.name || 'Unnamed user') + ' - ' + (user.phone_number || 'No phone number')}
                         </option>
                     ))}
                 </select>
@@ -108,24 +149,29 @@ export function UserManagement() {
                             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">S.No</th>
                             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Name</th>
                             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Phone Number</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Wallet Balance</th>
                             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Users Referred</th>
                             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Delivered Orders</th>
                             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Addresses</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Actions</th>
                         </tr></thead>
                         <tbody className="divide-y divide-gray-200">
-                            {isLoading ? <tr><td colSpan={6} className="py-8 text-center text-sm text-gray-600">Loading users...</td></tr>
-                                : users.length === 0 ? <tr><td colSpan={6} className="py-8 text-center text-sm text-gray-600">No active users found</td></tr>
+                            {isLoading ? <tr><td colSpan={8} className="py-8 text-center text-sm text-gray-600">Loading users...</td></tr>
+                                : users.length === 0 ? <tr><td colSpan={8} className="py-8 text-center text-sm text-gray-600">No active users found</td></tr>
                                 : users.map((user, index) => <tr key={user.id} className="align-top hover:bg-gray-50">
                                     <td className="px-4 py-4 text-sm text-gray-700">{(currentPage - 1) * pageSize + index + 1}</td>
                                     <td className="px-4 py-4 text-sm font-medium text-gray-900">{user.name || '—'}</td>
                                     <td className="px-4 py-4 text-sm text-gray-700">{user.phone_number || '—'}</td>
+                                    <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-gray-700">
+                                        ₹{Number(user.wallet_balence || 0).toFixed(2)}
+                                    </td>
                                     <td className="px-4 py-4 text-sm">
                                         {Number(user.referral_count) > 0 ? (
                                             <button
                                                 type="button"
                                                 onClick={() => applyReferrerFilter(user.id)}
                                                 className="rounded bg-green-100 px-2.5 py-1 font-semibold text-green-700 hover:bg-green-200"
-                                                title={`Show users referred by ${user.name || 'this user'}`}
+                                                title={'Show users referred by ' + (user.name || 'this user')}
                                             >
                                                 {user.referral_count}
                                             </button>
@@ -143,6 +189,17 @@ export function UserManagement() {
                                             </div>)}
                                         </div> : 'No active address'}
                                     </td>
+                                    <td className="px-4 py-4 text-sm">
+                                        <button
+                                            type="button"
+                                            onClick={() => openWalletEditor(user)}
+                                            className="rounded-md p-2 text-green-700 hover:bg-green-50"
+                                            aria-label={`Edit wallet balance for ${user.name || user.phone_number || 'customer'}`}
+                                            title="Edit wallet balance"
+                                        >
+                                            <Edit2 className="h-4 w-4" />
+                                        </button>
+                                    </td>
                                 </tr>)}
                         </tbody>
                     </table>
@@ -152,6 +209,49 @@ export function UserManagement() {
                 <div className="text-sm text-gray-600">Showing <span className="font-medium">{users.length}</span> of <span className="font-medium">{totalRecords}</span> users</div>
                 {totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
             </div>}
+            {walletUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <form
+                        onSubmit={saveWalletBalance}
+                        className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
+                    >
+                        <h2 className="text-lg font-semibold text-gray-900">Edit User Details</h2>
+                        <p className="mt-1 text-sm text-gray-600">
+                            {walletUser.name || walletUser.phone_number || 'Customer'}
+                        </p>
+                        <label htmlFor="wallet-balance" className="mt-5 block text-sm font-medium text-gray-700">
+                            Balance (₹)
+                        </label>
+                        <input
+                            id="wallet-balance"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={walletBalanceInput}
+                            onChange={(event) => setWalletBalanceInput(event.target.value)}
+                            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-600"
+                            required
+                        />
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                disabled={isSavingWallet}
+                                onClick={() => setWalletUser(null)}
+                                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isSavingWallet}
+                                className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                            >
+                                {isSavingWallet ? 'Saving...' : 'Update'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }

@@ -96,6 +96,7 @@ export function OrderDetails() {
         current_status,
         created_at,
         total_amount,
+        wallet_amount_used,
         delivery_charges,
         discount_amount,
         payment_status,
@@ -288,8 +289,13 @@ export function OrderDetails() {
                     <Row label="Delivery">
                         ₹{Number(delivery_charges || 0).toFixed(2)}
                     </Row>
-                    <Row label="Total" bold>
-                        ₹{Number(total_amount || 0).toFixed(2)}
+                    {Number(wallet_amount_used || 0) > 0 && (
+                        <Row label="Wallet Amount">
+                            -₹{Number(wallet_amount_used).toFixed(2)}
+                        </Row>
+                    )}
+                    <Row label="Order Total" bold>
+                        ₹{Math.max(0, Number(total_amount || 0) - Number(wallet_amount_used || 0)).toFixed(2)}
                     </Row>
                     <Row label="Payment">
                         {order_source === "OFFLINE" ? "Paid" : payment_status || "-"}
